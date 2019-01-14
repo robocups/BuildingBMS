@@ -1,0 +1,18 @@
+﻿<Window x:Class="building_bms.extratime"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:building_bms"
+        mc:Ignorable="d"
+        Title="زمان اضطراری" Height="219.512" Width="300" WindowStartupLocation="CenterScreen">
+    <Grid Background="#FF646464">
+        <TextBox x:Name="etFrom" HorizontalAlignment="Left" PreviewTextInput="NumberValidation" Height="23" Margin="109,45,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="62" FlowDirection="RightToLeft"/>
+        <TextBox x:Name="etTo" HorizontalAlignment="Left" PreviewTextInput="NumberValidation" Height="23" Margin="109,89,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="62" FlowDirection="RightToLeft"/>
+        <Label x:Name="label" Content="از ساعت (0 تا 23)" HorizontalAlignment="Left" Margin="177,45,0,0" VerticalAlignment="Top" Width="95" FlowDirection="RightToLeft" Foreground="White"/>
+        <Label x:Name="label_Copy" Content="تا ساعت (0 تا 23)" HorizontalAlignment="Left" Margin="178,88,0,0" VerticalAlignment="Top" Width="94" FlowDirection="RightToLeft" Foreground="White"/>
+        <Button x:Name="extratime_save" Content="تایید" HorizontalAlignment="Left" Margin="102,147,0,0" VerticalAlignment="Top" Width="75" Click="extratime_save_Click" Height="32"/>
+        <Label x:Name="label1" Content="زمان اضطراری تنها تا ساعت 24 هر روز اعتبار دارد." HorizontalAlignment="Left" Margin="22,10,0,0" VerticalAlignment="Top" Width="250" Height="35" FlowDirection="RightToLeft" Foreground="White"/>
+
+    </Grid>
+</Window>
