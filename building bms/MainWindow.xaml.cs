@@ -48,23 +48,23 @@ namespace building_bms
         Dictionary<int,int[]> channels = new Dictionary<int, int[]>();
         int[,] module = {
             //type 1 = lighting, type 2 = HVAC, type 3 = contactor
-            {1,6,4},
-            {2,3,4},
+            {1,235,12},
+            {2,6,4},
             //{2,7,8},
             //{2,8,4},
             //{2,9,4} 
         };
         int lightChannels=0, hvacChannels=0;
-        int subnet = 2;
+        int subnet = 1;
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{0,1} },
-            {"sw2",new int[]{0,2} },
-            {"sw3",new int[]{0,3} },
-            {"sw4",new int[]{0,4} },
-            {"sw5",new int[]{0,1} },
-            {"sw6",new int[]{0,2} },
-            {"sw7",new int[]{0,5} },
+            {"sw1",new int[]{235,1} },
+            {"sw2",new int[]{235,2} },
+            {"sw3",new int[]{235,3} },
+            {"sw4",new int[]{235,4} },
+            {"sw5",new int[]{235,1} },
+            {"sw6",new int[]{235,2} },
+            {"sw7",new int[]{235,5} },
 
             {"sw8",new int[]{0,4} },
             {"sw9",new int[]{0,3} },
@@ -85,9 +85,9 @@ namespace building_bms
 
             {"fc1", new int[]{6,3,2,1 } },
             {"fc2", new int[]{6,3,2,1 } },
-            {"fc3", new int[]{6,3,2,1 } },
-            {"fc4", new int[]{6,3,2,1 } },
-            {"fc5", new int[]{6,3,2,1 } },
+            {"fc3", new int[]{0,3,2,1 } },
+            {"fc4", new int[]{0,3,2,1 } },
+            {"fc5", new int[]{0,3,2,1 } },
         };
 
         int[,] speaker =
@@ -258,19 +258,29 @@ namespace building_bms
             //        return true;  
             //}
             //return false;
-            for (int i = 0; i < switches.LongCount(); i++)
+            foreach (var kvp in switches.ToArray())
             {
-                if (switches. == id && module[i, 0] == 1)
+                if ((kvp.Value)[0]== id && kvp.Key.Substring(0,1)=="s")
+                {
                     return true;
+                }
             }
             return false;
         }
         public bool ishvacModule(int id)
         {
-            for (int i = 0; i < module.GetLength(0); i++)
+            //for (int i = 0; i < module.GetLength(0); i++)
+            //{
+            //    if (module[i, 1] == id && module[i, 0] == 2)
+            //        return true;
+            //}
+            //return false;
+            foreach (var kvp in switches.ToArray())
             {
-                if (module[i, 1] == id && module[i, 0] == 2)
+                if ((kvp.Value)[0] == id && kvp.Key.Substring(0, 1) == "f")
+                {
                     return true;
+                }
             }
             return false;
         }
@@ -1584,7 +1594,7 @@ namespace building_bms
                                     break;
                                 case "sw5":
                                     sw5.Click -= sw5_Click;
-                                    sw5.IsChecked = switches["sw5"][0] != 0 ? Convert.ToBoolean((channels[3])[(switches["sw5"])[1]-1]) : false;
+                                    sw5.IsChecked = switches["sw5"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw5"])[1]-1]) : false;
                                     //kitchenlight_on.Visibility = (sw5.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
 
                                     sw5.IsEnabled = true;
