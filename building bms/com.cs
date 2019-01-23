@@ -213,7 +213,14 @@ namespace building_bms
                 send(json);
             }
         }
-
+        public void setfan(int n, int id, int chno, int val, bool direct)
+        {
+            if (direct)
+            {
+                byte[] c = { Convert.ToByte(chno), 3,Convert.ToByte(val) };
+                directcmd(0xA93A, Convert.ToByte(n), Convert.ToByte(id), c);
+            }
+        }
         public void setac(int subnet, int id, int n, int val, bool direct)
         {
             if (direct)

@@ -22,6 +22,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static building_bms.protocol;
 using System.IO;
+using Codeplex.Data;
 
 namespace building_bms
 {
@@ -31,37 +32,32 @@ namespace building_bms
     public partial class MainWindow : MetroWindow
     {
         BrushConverter bc = new BrushConverter();
-        int ct = 7, netloglines = 0;
+        int ct = 106, netloglines = 0;
         int[] switchs = new int[22];
         int[] switchs2 = new int[8];
         int[] fcs = new int[16];
         string[] holidaysList;
         string currentMode = "deactive";
 
-        //switches ids or relay channels for lighting
-        int[,] sid =
-        {
-            //unit 1 light switches
-
-            {6,7,4,5,1,2,3,13,14,12,10,11,8,9,15,16}
-        };
-        Dictionary<int,int[]> channels = new Dictionary<int, int[]>();
         int[,] module = {
             //type 1 = lighting, type 2 = HVAC, type 3 = contactor
-            {1,235,12},
-            {2,6,4},
-            //{2,7,8},
-            //{2,8,4},
-            //{2,9,4} 
+            {235,12},
+            {6,4},
+
         };
         int lightChannels=0, hvacChannels=0;
         int subnet = 1;
+        Dictionary<int, int[]> channels = new Dictionary<int, int[]>()
+        {
+            {235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
+            {6, new int[] {0,0,0,0} }
+        };
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{235,1} },
-            {"sw2",new int[]{235,2} },
-            {"sw3",new int[]{235,3} },
-            {"sw4",new int[]{235,4} },
+            {"sw1",new int[]{5,1} },
+            {"sw2",new int[]{5,2} },
+            {"sw3",new int[]{5,3} },
+            {"sw4",new int[]{5,4} },
             {"sw5",new int[]{235,1} },
             {"sw6",new int[]{235,2} },
             {"sw7",new int[]{235,5} },
@@ -83,11 +79,16 @@ namespace building_bms
 
             {"Sockets",new int[]{6,0} },
 
-            {"fc1", new int[]{6,3,2,1 } },
-            {"fc2", new int[]{6,3,2,1 } },
-            {"fc3", new int[]{0,3,2,1 } },
-            {"fc4", new int[]{0,3,2,1 } },
-            {"fc5", new int[]{0,3,2,1 } },
+            {"fc1", new int[]{6,11,5} },
+            {"fc2", new int[]{0,11,2 } },
+            {"fc3", new int[]{0,0,9,9,9 } },
+            {"fc4", new int[]{0,11,3 } },
+            {"fc5", new int[]{0,0,0,0,0 } },
+        };
+        //new DynamicJson() { }
+        Dictionary<string, dynamic> sws = new Dictionary<string, dynamic>()
+        {
+            {"fc1", new {high=new {did=6,cid=4},medium=new {did=6,cid=3},low=new {did=6,cid=2} } },
         };
 
         int[,] speaker =
@@ -136,7 +137,7 @@ namespace building_bms
             hourlyTimer.Elapsed += new ElapsedEventHandler(hourlyJobs);
             deactiveTimer.Elapsed += new ElapsedEventHandler(deactiveJobs);
             //inbioTimer.Enabled = true;
-            myTimer.Enabled = true;
+            //myTimer.Enabled = true;
             
             //accTab.Visibility = Visibility.Hidden;
             //generalTab.Visibility = Visibility.Hidden;
@@ -1068,15 +1069,16 @@ namespace building_bms
                         c3.getswitch(subnet, did[ct - 7, 1], direct);
                     }
                     break;
+
+                case "0xA39B":
+
+                    break;
                 case "0xE3E8"://temp respond
                     if (Convert.ToInt16(p.OriginalDeviceID) == 115)
                     {
-
                         Application.Current.Dispatcher.Invoke(new Action(() =>
-
                         { /* Your code here */
                             coeTemp.Content = "°" + Convert.ToInt16(p.Data[12]).ToString();
-
                         }));
                     } else if(Convert.ToInt16(p.OriginalDeviceID) == 114)
                     {
@@ -1698,38 +1700,67 @@ namespace building_bms
                 if(i != n)
                 {
                     c.setswitch(subnet, switches[name][0], switches[name][i], 0, direct);
-                    await Task.Delay(100);
+                    await Task.Delay(200);
                 }
             }
         }
         private async void fc1_high_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(1, "fc1");
-            await Task.Delay(400);
-            c.setswitch(subnet, switches["fc1"][0], switches["fc1"][1], 100, direct);
+            if (switches["fc1"][1] != 11)
+            {
+                groupCheck(1, "fc1");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc1"][0], switches["fc1"][2], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc1"][0], switches["fc1"][2],3,direct);
+            }
+            
         }
         private async void fc1_med_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(2, "fc1");
-            await Task.Delay(400);
-            c.setswitch(subnet, switches["fc1"][0], switches["fc1"][2], 100, direct);
+            if (switches["fc1"][1] != 11)
+            {
+                groupCheck(1, "fc1");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc1"][0], switches["fc1"][3], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc1"][0], switches["fc1"][2], 2, direct);
+            }
         }
         private async void fc1_low_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(3, "fc1");
-            await Task.Delay(400);
-            c.setswitch(subnet, switches["fc1"][0], switches["fc1"][3], 100, direct);
+            if (switches["fc1"][1] != 11)
+            {
+                groupCheck(1, "fc1");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc1"][0], switches["fc1"][4], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc1"][0], switches["fc1"][2], 1, direct);
+            }
         }
         private async void fc1_off_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            for(int i=1; i<switches["fc1"].Length; i++)
+            if (switches["fc1"][1] != 11)
             {
-                c.setswitch(subnet, switches["fc1"][0], switches["fc1"][i], 0, direct);
-                await Task.Delay(200);
+                for (int i = 2; i < switches["fc1"].Length; i++)
+                {
+                    c.setswitch(subnet, switches["fc1"][0], switches["fc1"][i], 0, direct);
+                    await Task.Delay(200);
+                }
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc1"][0], switches["fc1"][2], 0, direct);
             }
         }
         private async void fc2_high_Checked(object sender, RoutedEventArgs e)
