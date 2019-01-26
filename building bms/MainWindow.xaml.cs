@@ -40,9 +40,9 @@ namespace building_bms
         string currentMode = "deactive";
 
         int[,] module = {
-            //type 1 = lighting, type 2 = HVAC, type 3 = contactor
             {235,12},
             {6,4},
+            {55,4},
 
         };
         int lightChannels=0, hvacChannels=0;
@@ -50,17 +50,18 @@ namespace building_bms
         Dictionary<int, int[]> channels = new Dictionary<int, int[]>()
         {
             {235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
-            {6, new int[] {0,0,0,0} }
+            {6, new int[] {0,0,0,0} },
+            {55, new int[] {0,0,0,0} }
         };
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{5,1} },
-            {"sw2",new int[]{5,2} },
-            {"sw3",new int[]{5,3} },
-            {"sw4",new int[]{5,4} },
-            {"sw5",new int[]{235,1} },
-            {"sw6",new int[]{235,2} },
-            {"sw7",new int[]{235,5} },
+            {"sw1",new int[]{55,1} },
+            {"sw2",new int[]{55,2} },
+            {"sw3",new int[]{55,3} },
+            {"sw4",new int[]{55,4} },
+            {"sw5",new int[]{235,7} },
+            {"sw6",new int[]{235,8} },
+            {"sw7",new int[]{235,9} },
 
             {"sw8",new int[]{0,4} },
             {"sw9",new int[]{0,3} },
@@ -79,10 +80,10 @@ namespace building_bms
 
             {"Sockets",new int[]{6,0} },
 
-            {"fc1", new int[]{6,11,5} },
-            {"fc2", new int[]{0,11,2 } },
-            {"fc3", new int[]{0,0,9,9,9 } },
-            {"fc4", new int[]{0,11,3 } },
+            {"fc1", new int[]{235,11,1} },
+            {"fc2", new int[]{235,11,2 } },
+            {"fc3", new int[]{6,0,3,2,1 } },
+            {"fc4", new int[]{235,11,3 } },
             {"fc5", new int[]{0,0,0,0,0 } },
         };
         //new DynamicJson() { }
@@ -339,7 +340,7 @@ namespace building_bms
             }
             if (preactiveLight & switchs[0] == 0)
             {
-                c.setswitch(subnet, did[ct - 7, 0], sid[ct - 7, 0], 100, direct);
+                //c.setswitch(subnet, did[ct - 7, 0], sid[ct - 7, 0], 100, direct);
             }
         }
         public async void postactiveMethod()
@@ -800,255 +801,41 @@ namespace building_bms
                 }
             }));
             writelog("op: { " + opcode.ToString() + "--" + String.Join(" ", p.Data) + " }");
+
+            int id = 0;
+
             switch (opcode)
             {
                 case "0x32": //single channel control response"
                     int channelno = Convert.ToInt16(p.Data[11]);
-                    if (islightModule(Convert.ToInt16(p.OriginalDeviceID)))
+                    id = Convert.ToInt16(p.OriginalDeviceID);
+                    int value = Convert.ToInt16(p.Data[13]);
+                    if (channels.ContainsKey((id)))
                     {
-                        int[] s = channels[Convert.ToInt16(p.OriginalDeviceID)];
-                        s[channelno-1]= (Convert.ToInt16(p.Data[13]) == 0) ? 0 : 1;
-                        channels[Convert.ToInt16(p.OriginalDeviceID)] = s;
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            refsw(Convert.ToInt16(p.OriginalDeviceID));
-                        }));
+                        channels[id][channelno-1]= ( value == 0) ? 0 : 1;
+                        refsw(id);
+                        reffc(id);
                     }
-                    else if (ishvacModule(Convert.ToInt16(p.OriginalDeviceID)))
-                    {
-                        int[] s = channels[Convert.ToInt16(p.OriginalDeviceID)];
-                        s[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 0 : 1;
-                        channels[Convert.ToInt16(p.OriginalDeviceID)] = s;
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            reffc(Convert.ToInt16(p.OriginalDeviceID));
-                        }));
-                    }
-                    //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 0] && Convert.ToInt16(p.Data[12]) == 248)
-                    //{
-                    //    switchs[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 0 : 1;
-
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        refsw(subnet);
-                    //    }));
-                    //    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false & !timerCommand)
-                    //    {
-                    //        deactiveTimer.Enabled = true;
-                    //    }
-                    //}
-
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 0] && Convert.ToInt16(p.Data[12]) == 245)
-                    //{
-                    //    switchs[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 1 : 0;
-
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        refsw(subnet);
-                    //    }));
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 1] && Convert.ToInt16(p.Data[12]) == 248)
-                    //{
-                    //    switchs2[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 0 : 1;
-
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        refsw2(subnet);
-                    //    }));
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 1] && Convert.ToInt16(p.Data[12]) == 245)
-                    //{
-                    //    switchs2[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 1 : 0;
-
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        refsw2(subnet);
-                    //    }));
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2] && Convert.ToInt16(p.Data[12]) == 248)
-                    //{
-                    //    //fcs[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 0 : 1;
-
-                    //    //Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    //{
-                    //    //    reffc(1);
-                    //    //}));
-                    //    com c32 = new com();
-                    //    c32.getswitch(subnet, did[ct - 7, 2], direct);
-
-                    //    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false & !timerCommand)
-                    //    {
-                    //        deactiveTimer.Enabled = true;
-                    //    }
-
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2] && Convert.ToInt16(p.Data[12]) == 245)
-                    //{
-                    //    //fcs[channelno - 1] = (Convert.ToInt16(p.Data[13]) == 0) ? 1 : 0;
-
-                    //    //Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    //{
-                    //    //    reffc(1);
-                    //    //}));
-                    //    com c33 = new com();
-                    //    c33.getswitch(subnet, did[ct - 7, 2], direct);
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 3] && Convert.ToInt16(p.Data[12]) == 248)
-                    //{
-
-                    //    //fcs[channelno +7] = (Convert.ToInt16(p.Data[13]) == 0) ? 0 : 1;
-
-                    //    //Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    //{
-                    //    //    reffc(2);
-                    //    //}));
-                    //    com c34 = new com();
-                    //    c34.getswitch(subnet, did[ct - 7, 3], direct);
-                    //    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false & !timerCommand)
-                    //    {
-                    //        deactiveTimer.Enabled = true;
-                    //    }
-
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 3] && Convert.ToInt16(p.Data[12]) == 245)
-                    //{
-                    //    //fcs[channelno + 7] = (Convert.ToInt16(p.Data[13]) == 0) ? 1 : 0;
-
-                    //    //Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    //{
-                    //    //    reffc(2);
-                    //    //}));
-                    //    com c35 = new com();
-                    //    c35.getswitch(subnet, did[ct - 7, 3], direct);
-
-                    //}
-
+                    
                     break;
                 case "0x34"://channels state
-                    int channelnumber = getDevCH(Convert.ToInt16(p.OriginalDeviceID));
-                    if (islightModule(Convert.ToInt16(p.OriginalDeviceID)) && Convert.ToInt16(p.Data[11])==channelnumber)
+                    int channelnumber = Convert.ToInt16(p.Data[11]);
+                    id = Convert.ToInt16(p.OriginalDeviceID);
+                    if (channels.ContainsKey((id)))
                     {
                         int[] s = new int[channelnumber];
                         for (int i = 12; i < 12 + channelnumber; i++)
                         {
-                            s[i - 12] = (Convert.ToInt16(p.Data[i]) == 100) ? 1 : 0;
+                            channels[id][i-12] = (Convert.ToInt16(p.Data[i]) == 0) ? 0 : 1;
                         }
-                        
-                        channels[Convert.ToInt16(p.OriginalDeviceID)] = s;
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            refsw(Convert.ToInt16(p.OriginalDeviceID));
-                        }));
+                        refsw(id);
                     }
-                    else if (ishvacModule(Convert.ToInt16(p.OriginalDeviceID)) && Convert.ToInt16(p.Data[11]) == channelnumber)
-                    {
-                        int[] s = new int[channelnumber];
-                        for (int i = 12; i < 12 + channelnumber; i++)
-                        {
-                            s[i - 12] = (Convert.ToInt16(p.Data[i]) == 100) ? 1 : 0;
-                        }
-
-                        channels[Convert.ToInt16(p.OriginalDeviceID)] = s;
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            reffc(Convert.ToInt16(p.OriginalDeviceID));
-                        }));
-                    }
-                    //    channelno = Convert.ToInt16(p.Data[11]);
-                    //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 0] & ct != 0)
-                    //{
-                    //    for (int i = 12; i < 12 + 16; i++)
-                    //    {
-                    //        switchs[i - 12] = (Convert.ToInt16(p.Data[i]) == 100) ? 1 : 0;
-                    //    }
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        refsw(subnet);
-                    //    }));
-                    //}
-                    //else if(Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 1] & ct != 0)
-                    //{
-                    //    for (int i = 12; i < 12 + 8; i++)
-                    //    {
-                    //        switchs2[i - 12] = (Convert.ToInt16(p.Data[i]) == 100) ? 1 : 0;
-                    //    }
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        refsw2(subnet);
-                    //    }));
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2])
-                    //{
-                    //    for (int i = 12; i < 12 + 8; i++)
-                    //    {
-                    //        fcs[i - 12] = (Convert.ToInt16(p.Data[i]) == 0) ? 0 : 1;
-                    //    }
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        reffc(1);
-                    //    }));
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 3])
-                    //{
-                    //    for (int i = 12; i < 12 + 8; i++)
-                    //    {
-                    //        fcs[i - 4] = (Convert.ToInt16(p.Data[i]) == 0) ? 0 : 1;
-                    //    }
-                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    {
-                    //        reffc(2);
-                    //    }));
-                    //}
+                    
                     break;
                 case "0xEFFF":
-                    int channelno2 = Convert.ToInt16(p.Data[12]);
-                    if (islightModule(Convert.ToInt16(p.OriginalDeviceID)))
-                    {
-                        com c1 = new com();
-                        c1.getswitch(subnet, Convert.ToInt16(p.OriginalDeviceID), direct);
-                    }
-                    else if (ishvacModule(Convert.ToInt16(p.OriginalDeviceID)))
-                    {
+                    id = Convert.ToInt16(p.OriginalDeviceID);
                         com c2 = new com();
-                        c2.getswitch(subnet, Convert.ToInt16(p.OriginalDeviceID), direct);
-                    }
-                    //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2])
-                    //{
-                    //    writelog("Manually channel set of HVAC module : " + did[ct - 7, 2].ToString());
-                    //    //for (int i = 0; i < 8; i++)
-                    //    //{
-                    //    //    fcs[i] = (Convert.ToInt16(p.Data[19]) & i+1) == i+1 ? 1:0;
-                    //    //}
-                    //    //Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    //{
-                    //    //    reffc(1);
-                    //    //}));
-                    //    com c1 = new com();
-                    //    c1.getswitch(subnet, did[ct - 7, 2], direct);
-                    //    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false)
-                    //    {
-                    //        deactiveTimer.Enabled = true;
-                    //    }
-
-                    //}
-                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 3])
-                    //{
-                    //    writelog("Manually channel set of HVAC module : " + did[ct - 7, 3].ToString());
-                    //    //for (int i = 8; i < 16; i++)
-                    //    //{
-                    //    //    fcs[i] = (Convert.ToInt16(p.Data[16]) & i+1) == i+1 ? 1 : 0;
-                    //    //}
-                    //    //Application.Current.Dispatcher.Invoke(new Action(() =>
-                    //    //{
-                    //    //    reffc(2);
-                    //    //}));
-                    //    com c2 = new com();
-                    //    c2.getswitch(subnet, did[ct - 7, 3], direct);
-                    //    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false)
-                    //    {
-                    //        deactiveTimer.Enabled = true;
-                    //    }
-                    //}
+                        c2.getswitch(subnet, id, direct);
                     break;
 
                 case "0x3":
@@ -1069,26 +856,28 @@ namespace building_bms
                         c3.getswitch(subnet, did[ct - 7, 1], direct);
                     }
                     break;
-
                 case "0xA39B":
-
+                    //AC Respond
+                    id = Convert.ToInt16(p.OriginalDeviceID);
+                    com c4 = new com();
+                    c4.getswitch(subnet, id, direct);
                     break;
                 case "0xE3E8"://temp respond
-                    if (Convert.ToInt16(p.OriginalDeviceID) == 115)
-                    {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        { /* Your code here */
-                            coeTemp.Content = "°" + Convert.ToInt16(p.Data[12]).ToString();
-                        }));
-                    } else if(Convert.ToInt16(p.OriginalDeviceID) == 114)
-                    {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                    //if (Convert.ToInt16(p.OriginalDeviceID) == 115)
+                    //{
+                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    //    { /* Your code here */
+                    //        coeTemp.Content = "°" + Convert.ToInt16(p.Data[12]).ToString();
+                    //    }));
+                    //} else if(Convert.ToInt16(p.OriginalDeviceID) == 114)
+                    //{
+                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
 
-                        { /* Your code here */
-                            temp.Content = "°" + Convert.ToInt16(p.Data[12]).ToString();
+                    //    { /* Your code here */
+                    //        temp.Content = "°" + Convert.ToInt16(p.Data[12]).ToString();
 
-                        }));
-                    }
+                    //    }));
+                    //}
                     break;
                 case "0xE3E5"://temp
 
@@ -1151,22 +940,14 @@ namespace building_bms
         }
         public async void queue(int n)
         {
-            fc1_off.Checked -= fc1_off_Checked;
-            fc2_high_off.Checked -= fc2_high_off_Checked;
-            fc3_off.Checked -= fc3_off_Checked;
-            fc4_off.Checked -= fc4_off_Checked;
-            fc5_off.Checked -= fc5_off_Checked;
-            fc1_off.IsChecked = fc2_high_off.IsChecked = fc3_off.IsChecked = fc4_off.IsChecked = fc5_off.IsChecked = true;
-            fc1_off.Checked += fc1_off_Checked;
-            fc2_high_off.Checked += fc2_high_off_Checked;
-            fc3_off.Checked += fc3_off_Checked;
-            fc4_off.Checked += fc4_off_Checked;
-            fc5_off.Checked += fc5_off_Checked;
+            for (int i = 0; i < 6; i++)
+                fcOff("fc" + (i + 1).ToString());
+
             await Task.Delay(500);
             com c = new com();
             for(int i=0; i<module.Length; i++)
             {
-                c.getswitch(subnet, module[i,1], direct);
+                c.getswitch(subnet, module[i,0], direct);
                 await Task.Delay(300);
             }
             //c.getswitch(subnet, did[ct - 7, 0], direct);
@@ -1545,152 +1326,388 @@ namespace building_bms
             }
         }
 
-        //
-        //right side menu bottons click function
-        //--------------------------------------
-
-        //clean last cottage states of switchs and elements
-        //
 
         public void refsw(int n)
         {
+            //int n is the index of channels
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     for (int i = 0; i < switches.LongCount(); i++)
                     {
-                        int[] data = switches.ContainsKey("sw" + (i + 1).ToString())? switches["sw" + (i + 1).ToString()]:null;
-                        if (data != null && data[0] == n && switches["sw" + (i + 1).ToString()][0]!=0)
+                        if(switches.ContainsKey("sw" + (i + 1).ToString()) && switches["sw" + (i + 1).ToString()][0]==n)
                         {
-                            int chno = 0;
-                            switch ("sw" + (i + 1).ToString())
-                            {
-                                case "sw1":
-                                    sw1.Click -= sw1_Click;
-                                    sw1.IsChecked = switches["sw1"][0]!=0 ? Convert.ToBoolean(channels[n][(switches["sw1"])[1]-1]) : false;
-                                    //tralight_on.Visibility = (sw1.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-                                    sw1.IsEnabled = true;
-                                    sw1.Click += sw1_Click;
-                                    break;
-                                case "sw2":
-                                    sw2.Click -= sw2_Click;
-                                    sw2.IsChecked = switches["sw2"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw2"])[1]-1]) : false;
-                                    //rahrolight_on.Visibility = (sw2.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-                                    sw2.IsEnabled = true;
-                                    sw2.Click += sw2_Click;
-                                    break;
-                                case "sw3":
-                                    sw3.Click -= sw3_Click;
-                                    sw3.IsChecked = switches["sw3"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw3"])[1]-1]) : false;
-                                    //bedroomlight_on.Visibility = (sw3.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw3.IsEnabled = true;
-                                    sw3.Click += sw3_Click;
-                                    break;
-                                case "sw4":
-                                    sw4.Click -= sw4_Click;
-                                    sw4.IsChecked = switches["sw4"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw4"])[1]-1]) : false;
-                                    //makeuplight_on.Visibility = (sw4.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw4.IsEnabled = true;
-                                    sw4.Click += sw4_Click;
-                                    break;
-                                case "sw5":
-                                    sw5.Click -= sw5_Click;
-                                    sw5.IsChecked = switches["sw5"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw5"])[1]-1]) : false;
-                                    //kitchenlight_on.Visibility = (sw5.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw5.IsEnabled = true;
-                                    sw5.Click += sw5_Click;
-                                    break;
-                                case "sw6":
-                                    sw6.Click -= sw6_Click;
-                                    sw6.IsChecked = switches["sw6"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw6"])[1]-1]) : false;
-                                    //rooflight_on.Visibility = (sw6.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw6.IsEnabled = true;
-                                    sw6.Click += sw6_Click;
-                                    break;
-                                case "sw7":
-                                    sw7.Click -= sw7_Click;
-                                    sw7.IsChecked = switches["sw7"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw7"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw7.IsEnabled = true;
-                                    sw7.Click += sw7_Click;
-                                    break;
-                                case "sw8":
-                                    sw8.Click -= sw8_Click;
-                                    sw8.IsChecked = switches["sw8"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw8"])[1]]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw8.IsEnabled = true;
-                                    sw8.Click += sw8_Click;
-                                    break;
-                                case "sw9":
-                                    sw9.Click -= sw9_Click;
-                                    sw9.IsChecked = switches["sw9"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw9"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw9.IsEnabled = true;
-                                    sw9.Click += sw9_Click;
-                                    break;
-                                case "sw10":
-                                    sw10.Click -= sw10_Click;
-                                    sw10.IsChecked = switches["sw10"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw10"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw10.IsEnabled = true;
-                                    sw10.Click += sw10_Click;
-                                    break;
-                                case "sw11":
-                                    sw11.Click -= sw11_Click;
-                                    sw11.IsChecked = switches["sw11"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw11"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw11.IsEnabled = true;
-                                    sw11.Click += sw11_Click;
-                                    break;
-                                case "sw12":
-                                    sw12.Click -= sw12_Click;
-                                    sw12.IsChecked = switches["sw12"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw12"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw12.IsEnabled = true;
-                                    sw12.Click += sw12_Click;
-                                    break;
-                                case "sw13":
-                                    sw13.Click -= sw13_Click;
-                                    sw13.IsChecked = switches["sw13"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw13"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw13.IsEnabled = true;
-                                    sw13.Click += sw13_Click;
-                                    break;
-                                case "sw14":
-                                    sw14.Click -= sw14_Click;
-                                    sw14.IsChecked = switches["sw14"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw14"])[1]-1]) : false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw14.IsEnabled = true;
-                                    sw14.Click += sw14_Click;
-                                    break;
-                                case "sw15":
-                                    sw15.Click -= sw15_Click;
-                                    sw15.IsChecked = switches["sw15"][0] != 0 ? Convert.ToBoolean((channels[n])[(switches["sw15"])[1]-1]):false;
-                                    //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                    sw15.IsEnabled = true;
-                                    sw15.Click += sw15_Click;
-                                    break;
-                                default:
-
-                                    break;
-                            }
-                        }
-                        
+                            switchSet("sw" + (i + 1).ToString(), channels[n][switches["sw" + (i + 1).ToString()][1]-1]==0?false:true);
+                        }   
                     }
                 }));
+        }
+        public void switchSet(string sw, bool state)
+        {
+            switch (sw)
+            {
+                case "sw1":
+                    sw1.Click -= sw1_Click;
+                    sw1.IsChecked = state;
+                    sw1.IsEnabled = true;
+                    sw1.Click += sw1_Click;
+                    break;
+                case "sw2":
+                    sw2.Click -= sw2_Click;
+                    sw2.IsChecked = state;
+                    sw2.IsEnabled = true;
+                    sw2.Click += sw2_Click;
+                    break;
+                case "sw3":
+                    sw3.Click -= sw3_Click;
+                    sw3.IsChecked = state;
+                    sw3.IsEnabled = true;
+                    sw3.Click += sw3_Click;
+                    break;
+                case "sw4":
+                    sw4.Click -= sw4_Click;
+                    sw4.IsChecked = state;
+                    sw4.IsEnabled = true;
+                    sw4.Click += sw4_Click;
+                    break;
+                case "sw5":
+                    sw5.Click -= sw5_Click;
+                    sw5.IsChecked = state;
+                    sw5.IsEnabled = true;
+                    sw5.Click += sw5_Click;
+                    break;
+                case "sw6":
+                    sw6.Click -= sw6_Click;
+                    sw6.IsChecked = state;
+                    sw6.IsEnabled = true;
+                    sw6.Click += sw6_Click;
+                    break;
+                case "sw7":
+                    sw7.Click -= sw7_Click;
+                    sw7.IsChecked = state;
+                    sw7.IsEnabled = true;
+                    sw7.Click += sw7_Click;
+                    break;
+                case "sw8":
+                    sw8.Click -= sw8_Click;
+                    sw8.IsChecked = state;
+                    sw8.IsEnabled = true;
+                    sw8.Click += sw8_Click;
+                    break;
+                case "sw9":
+                    sw9.Click -= sw9_Click;
+                    sw9.IsChecked = state;
+                    sw9.IsEnabled = true;
+                    sw9.Click += sw9_Click;
+                    break;
+                case "sw10":
+                    sw10.Click -= sw10_Click;
+                    sw10.IsChecked = state;
+                    sw10.IsEnabled = true;
+                    sw10.Click += sw10_Click;
+                    break;
+                case "sw11":
+                    sw11.Click -= sw11_Click;
+                    sw11.IsChecked = state;
+                    sw11.IsEnabled = true;
+                    sw11.Click += sw11_Click;
+                    break;
+                case "sw12":
+                    sw12.Click -= sw12_Click;
+                    sw12.IsChecked = state;
+                    sw12.IsEnabled = true;
+                    sw12.Click += sw12_Click;
+                    break;
+                case "sw13":
+                    sw13.Click -= sw13_Click;
+                    sw13.IsChecked = state;
+                    sw13.IsEnabled = true;
+                    sw13.Click += sw13_Click;
+                    break;
+                case "sw14":
+                    sw14.Click -= sw14_Click;
+                    sw14.IsChecked = state;
+                    sw14.IsEnabled = true;
+                    sw14.Click += sw14_Click;
+                    break;
+                case "sw15":
+                    sw15.Click -= sw15_Click;
+                    sw15.IsChecked = state;
+                    sw15.IsEnabled = true;
+                    sw15.Click += sw15_Click;
+                    break;
+                default:
 
+                    break;
+            }
+        }
+        public void reffc(int n)
+        {
+            //int n is the channels index
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                fc1_off.Checked -= fc1_off_Checked;
+                fc2_high_off.Checked -= fc2_high_off_Checked;
+                fc3_off.Checked -= fc3_off_Checked;
+                fc4_off.Checked -= fc4_off_Checked;
+                fc5_off.Checked -= fc5_off_Checked;
+                //fc1_off.IsChecked = fc2_high_off.IsChecked = fc3_off.IsChecked = fc4_off.IsChecked = fc5_off.IsChecked = true;
+                fc1_off.Checked += fc1_off_Checked;
+                fc2_high_off.Checked += fc2_high_off_Checked;
+                fc3_off.Checked += fc3_off_Checked;
+                fc4_off.Checked += fc4_off_Checked;
+                fc5_off.Checked += fc5_off_Checked;
+                for (int i = 0; i < switches.LongCount(); i++)
+                {
+                    int[] data = switches.ContainsKey("fc" + (i + 1).ToString()) ? switches["fc" + (i + 1).ToString()] : null;
+                    if (data != null && data[0] == n)
+                    {
+                        
+                    }
+
+                }
+            }));
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                for (int i = 0; i < switches.LongCount(); i++)
+                {
+                    if (switches.ContainsKey("fc" + (i + 1).ToString()) && switches["fc" + (i + 1).ToString()][0] == n)
+                    {
+                        
+                        int s = 3;
+                        for (int j = 2; j < 5; j++)
+                        {
+                            
+                            if(channels[n][switches["fc" + (i + 1).ToString()][j]] == 1)
+                            {
+                                
+                                break;
+                            }
+                            s--;
+                        }
+
+                        
+                        fcSet("fc" + (i + 1).ToString(), s);
+                    }
+                }
+            }));
+        }
+        public void fcSet(string fc, int state)
+        {
+            fcOff(fc);
+            switch (fc)
+            {
+                case "fc1":
+                    if (state == 3)
+                    {
+                        fc1_high.Checked -= fc1_high_Checked;
+                        fc1_high.IsChecked = true;
+                        fc1_high.Checked += fc1_high_Checked;
+                    }
+                    else if (state == 2)
+                    {
+                        fc1_med.Checked -= fc1_med_Checked;
+                        fc1_med.IsChecked = true;
+                        fc1_med.Checked += fc1_med_Checked;
+                    }
+                    else if (state == 1)
+                    {
+                        fc1_low.Checked -= fc1_low_Checked;
+                        fc1_low.IsChecked = true;
+                        fc1_low.Checked += fc1_low_Checked;
+                    }
+                    else
+                    {
+                        fc1_off.Checked -= fc1_off_Checked;
+                        fc1_off.IsChecked = true;
+                        fc1_off.Checked += fc1_off_Checked;
+                    }
+                    break;
+                case "fc2":
+                    if (state == 3)
+                    {
+                        fc2_high.Checked -= fc2_high_Checked;
+                        fc2_high.IsChecked = true;
+                        fc2_high.Checked += fc2_high_Checked;
+                    }
+                    else if (state == 2)
+                    {
+                        fc2_med.Checked -= fc2_med_Checked;
+                        fc2_med.IsChecked = true;
+                        fc2_med.Checked += fc2_med_Checked;
+                    }
+                    else if (state == 1)
+                    {
+                        fc2_low.Checked -= fc2_low_Checked;
+                        fc2_low.IsChecked = true;
+                        fc2_low.Checked += fc2_low_Checked;
+                    }
+                    else
+                    {
+                        fc2_high_off.Checked -= fc2_high_off_Checked;
+                        fc2_high_off.IsChecked = true;
+                        fc2_high_off.Checked += fc2_high_off_Checked;
+                    }
+                    
+                    break;
+                case "fc3":
+                    if (state == 3)
+                    {
+                        fc3_high.Checked -= fc3_high_Checked;
+                        fc3_high.IsChecked = true;
+                        fc3_high.Checked += fc3_high_Checked;
+                    }
+                    else if (state == 2)
+                    {
+                        fc3_med.Checked -= fc3_med_Checked;
+                        fc3_med.IsChecked = true;
+                        fc3_med.Checked += fc3_med_Checked;
+                    }
+                    else if (state == 1)
+                    {
+                        fc3_low.Checked -= fc3_low_Checked;
+                        fc3_low.IsChecked = true;
+                        fc3_low.Checked += fc3_low_Checked;
+                    }
+                    else
+                    {
+                        fc3_off.Checked -= fc3_off_Checked;
+                        fc3_off.IsChecked = true;
+                        fc3_off.Checked += fc3_off_Checked;
+                    }
+                    
+                    break;
+                case "fc4":
+                    if (state == 3)
+                    {
+                        fc4_high.Checked -= fc4_high_Checked;
+                        fc4_high.IsChecked = true;
+                        fc4_high.Checked += fc4_high_Checked;
+                    }
+                    else if (state == 2)
+                    {
+                        fc4_med.Checked -= fc4_med_Checked;
+                        fc4_med.IsChecked = true;
+                        fc4_med.Checked += fc4_med_Checked;
+                    }
+                    else if (state == 1)
+                    {
+                        fc4_low.Checked -= fc4_low_Checked;
+                        fc4_low.IsChecked = true;
+                        fc4_low.Checked += fc4_low_Checked;
+                    }
+                    else
+                    {
+                        fc4_off.Checked -= fc4_off_Checked;
+                        fc4_off.IsChecked = true;
+                        fc4_off.Checked += fc4_off_Checked;
+                    }
+                    
+                    break;
+                case "fc5":
+                    if (state == 3)
+                    {
+                        fc5_high.Checked -= fc5_high_Checked;
+                        fc5_high.IsChecked = true;
+                        fc5_high.Checked += fc5_high_Checked;
+                    }
+                    else if (state == 2)
+                    {
+                        fc5_med.Checked -= fc5_med_Checked;
+                        fc5_med.IsChecked = true;
+                        fc5_med.Checked += fc5_med_Checked;
+                    }
+                    else if (state == 1)
+                    {
+                        fc5_low.Checked -= fc5_low_Checked;
+                        fc5_low.IsChecked = true;
+                        fc5_low.Checked += fc5_low_Checked;
+                    }
+                    else
+                    {
+                        fc5_off.Checked -= fc5_off_Checked;
+                        fc5_off.IsChecked = true;
+                        fc5_off.Checked += fc5_off_Checked;
+                    }
+                    
+                    break;
+
+            }
+        }
+        public void fcOff(string fc)
+        {
+            switch (fc)
+            {
+                case "fc1":
+                     fc1_high.Checked -= fc1_high_Checked;
+                     fc1_high.IsChecked = false;
+                     fc1_high.Checked += fc1_high_Checked;
+                     fc1_med.Checked -= fc1_med_Checked;
+                     fc1_med.IsChecked = false;
+                     fc1_med.Checked += fc1_med_Checked;
+                     fc1_low.Checked -= fc1_low_Checked;
+                     fc1_low.IsChecked = false;
+                    fc1_low.Checked += fc1_low_Checked;
+                    fc1_off.Checked -= fc1_off_Checked;
+                    fc1_off.IsChecked = false;
+                    fc1_off.Checked += fc1_off_Checked;
+                    break;
+                case "fc2":
+                    fc2_high.Checked -= fc2_high_Checked;
+                    fc2_high.IsChecked = false;
+                    fc2_high.Checked += fc2_high_Checked;
+                    fc2_med.Checked -= fc2_med_Checked;
+                    fc2_med.IsChecked = false;
+                    fc2_med.Checked += fc2_med_Checked;
+                    fc2_low.Checked -= fc2_low_Checked;
+                    fc2_low.IsChecked = false;
+                    fc2_low.Checked += fc2_low_Checked;
+                    fc2_high_off.Checked -= fc2_high_off_Checked;
+                    fc2_high_off.IsChecked = false;
+                    fc2_high_off.Checked += fc2_high_off_Checked;
+                    break;
+                case "fc3":
+                    fc3_high.Checked -= fc3_high_Checked;
+                    fc3_high.IsChecked = false;
+                    fc3_high.Checked += fc3_high_Checked;
+                    fc3_med.Checked -= fc3_med_Checked;
+                    fc3_med.IsChecked = false;
+                    fc3_med.Checked += fc3_med_Checked;
+                    fc3_low.Checked -= fc3_low_Checked;
+                    fc3_low.IsChecked = false;
+                    fc3_low.Checked += fc3_low_Checked;
+                    fc3_off.Checked -= fc3_off_Checked;
+                    fc3_off.IsChecked = false;
+                    fc3_off.Checked += fc3_off_Checked;
+                    break;
+                case "fc4":
+                    fc4_high.Checked -= fc4_high_Checked;
+                    fc4_high.IsChecked = false;
+                    fc4_high.Checked += fc4_high_Checked;
+                    fc4_med.Checked -= fc4_med_Checked;
+                    fc4_med.IsChecked = false;
+                    fc4_med.Checked += fc4_med_Checked;
+                    fc4_low.Checked -= fc4_low_Checked;
+                    fc4_low.IsChecked = false;
+                    fc4_low.Checked += fc4_low_Checked;
+                    fc4_off.Checked -= fc4_off_Checked;
+                    fc4_off.IsChecked = false;
+                    fc4_off.Checked += fc4_off_Checked;
+                    break;
+                case "fc5":
+                    fc5_high.Checked -= fc5_high_Checked;
+                    fc5_high.IsChecked = false;
+                    fc5_high.Checked += fc5_high_Checked;
+                    fc5_med.Checked -= fc5_med_Checked;
+                    fc5_med.IsChecked = false;
+                    fc5_med.Checked += fc5_med_Checked;
+                    fc5_low.Checked -= fc5_low_Checked;
+                    fc5_low.IsChecked = false;
+                    fc5_low.Checked += fc5_low_Checked;
+                    fc5_off.Checked -= fc5_off_Checked;
+                    fc5_off.IsChecked = false;
+                    fc5_off.Checked += fc5_off_Checked;
+                    break;
+            }
         }
         public async void groupCheck(int n,string name)
         {
@@ -2064,90 +2081,7 @@ namespace building_bms
             e.Handled = regex.IsMatch(e.Text);
         }
 
-        public void reffc(int n)
-        {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    fc1_off.Checked -= fc1_off_Checked;
-                    fc2_high_off.Checked -= fc2_high_off_Checked;
-                    fc3_off.Checked -= fc3_off_Checked;
-                    fc4_off.Checked -= fc4_off_Checked;
-                    fc5_off.Checked -= fc5_off_Checked;
-                    fc1_off.IsChecked = fc2_high_off.IsChecked = fc3_off.IsChecked = fc4_off.IsChecked = fc5_off.IsChecked = true;
-                    fc1_off.Checked += fc1_off_Checked;
-                    fc2_high_off.Checked += fc2_high_off_Checked;
-                    fc3_off.Checked += fc3_off_Checked;
-                    fc4_off.Checked += fc4_off_Checked;
-                    fc5_off.Checked += fc5_off_Checked;
-                    for (int i = 0; i < switches.LongCount(); i++)
-                    {
-                        int[] data = switches.ContainsKey("fc" + (i + 1).ToString()) ? switches["fc" + (i + 1).ToString()] : null;
-                        if (data != null && data[0] == n)
-                        {
-                            switch ("fc" + (i + 1).ToString())
-                            {
-                                case "fc1":
-                                    fc1_low.Checked -= fc1_low_Checked;
-                                    fc1_low.IsChecked = Convert.ToBoolean(channels[n][(switches["fc1"])[3] - 1]);
-                                    fc1_low.Checked += fc1_low_Checked;
-                                    fc1_med.Checked -= fc1_med_Checked;
-                                    fc1_med.IsChecked = Convert.ToBoolean(channels[n][(switches["fc1"])[2] - 1]);
-                                    fc1_med.Checked += fc1_med_Checked;
-                                    fc1_high.Checked -= fc1_high_Checked;
-                                    fc1_high.IsChecked = Convert.ToBoolean(channels[n][(switches["fc1"])[1] - 1]);
-                                    fc1_high.Checked += fc1_high_Checked;
-                                    break;
-                                case "fc2":
-                                    fc2_low.Checked -= fc2_low_Checked;
-                                    fc2_low.IsChecked = Convert.ToBoolean(channels[n][(switches["fc2"])[3] - 1]);
-                                    fc2_low.Checked += fc2_low_Checked;
-                                    fc2_med.Checked -= fc2_med_Checked;
-                                    fc2_med.IsChecked = Convert.ToBoolean(channels[n][(switches["fc2"])[2] - 1]);
-                                    fc2_med.Checked += fc2_med_Checked;
-                                    fc2_high.Checked -= fc2_high_Checked;
-                                    fc2_high.IsChecked = Convert.ToBoolean(channels[n][(switches["fc2"])[1] - 1]);
-                                    fc2_high.Checked += fc2_high_Checked;
-                                    break;
-                                case "fc3":
-                                    fc3_low.Checked -= fc3_low_Checked;
-                                    fc3_low.IsChecked = Convert.ToBoolean(channels[n][(switches["fc3"])[3] - 1]);
-                                    fc3_low.Checked += fc3_low_Checked;
-                                    fc3_med.Checked -= fc3_med_Checked;
-                                    fc3_med.IsChecked = Convert.ToBoolean(channels[n][(switches["fc3"])[2] - 1]);
-                                    fc3_med.Checked += fc3_med_Checked;
-                                    fc3_high.Checked -= fc3_high_Checked;
-                                    fc3_high.IsChecked = Convert.ToBoolean(channels[n][(switches["fc3"])[1] - 1]);
-                                    fc3_high.Checked += fc3_high_Checked;
-                                    break;
-                                case "fc4":
-                                    fc4_low.Checked -= fc4_low_Checked;
-                                    fc4_low.IsChecked = Convert.ToBoolean(channels[n][(switches["fc4"])[3] - 1]);
-                                    fc4_low.Checked += fc4_low_Checked;
-                                    fc4_med.Checked -= fc4_med_Checked;
-                                    fc4_med.IsChecked = Convert.ToBoolean(channels[n][(switches["fc4"])[2] - 1]);
-                                    fc4_med.Checked += fc1_med_Checked;
-                                    fc4_high.Checked -= fc4_high_Checked;
-                                    fc4_high.IsChecked = Convert.ToBoolean(channels[n][(switches["fc4"])[1] - 1]);
-                                    fc4_high.Checked += fc4_high_Checked;
-                                    break;
-                                case "fc5":
-                                    fc5_low.Checked -= fc5_low_Checked;
-                                    fc5_low.IsChecked = Convert.ToBoolean(channels[n][(switches["fc5"])[3] - 1]);
-                                    fc5_low.Checked += fc5_low_Checked;
-                                    fc5_med.Checked -= fc5_med_Checked;
-                                    fc5_med.IsChecked = Convert.ToBoolean(channels[n][(switches["fc5"])[2] - 1]);
-                                    fc5_med.Checked += fc5_med_Checked;
-                                    fc5_high.Checked -= fc5_high_Checked;
-                                    fc5_high.IsChecked = Convert.ToBoolean(channels[n][(switches["fc5"])[1] - 1]);
-                                    fc5_high.Checked += fc5_high_Checked;
-                                    break;
-                                
-                            }
-                        }
-                        
-                    }
-                }));
-        }
+        
 
 
         //#zkey access control module
