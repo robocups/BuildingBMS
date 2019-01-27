@@ -33,12 +33,12 @@ namespace building_bms
     {
         BrushConverter bc = new BrushConverter();
         int ct = 106, netloglines = 0;
-        int[] switchs = new int[22];
-        int[] switchs2 = new int[8];
-        int[] fcs = new int[16];
+        //int[] switchs = new int[22];
+        //int[] switchs2 = new int[8];
+        //int[] fcs = new int[16];
         string[] holidaysList;
         string currentMode = "deactive";
-
+        int subnet = 106;
         int[,] module = {
             //{235,12},
             {11,4},
@@ -49,8 +49,7 @@ namespace building_bms
             {6,8},
 
         };
-        int lightChannels=0, hvacChannels=0;
-        int subnet = 106;
+        
         Dictionary<int, int[]> channels = new Dictionary<int, int[]>()
         {
             //{235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
@@ -95,16 +94,16 @@ namespace building_bms
             {"fc5", new int[]{12,0,4,4,3 } },
         };
         
-        int[,] speaker =
-        {
-            {2,1,4,3,5}
-        };
+        //int[,] speaker =
+        //{
+        //    {2,1,4,3,5}
+        //};
         //devices ids or module ids
-        int[,] did =
-        {
-            //[unit 1] : lighting relay - speakers and socket relay - AC1 - AC2 - smartswitches1 - smartswitches2 - power meter
-            {4,3,7,8,115,114,40 }
-        };
+        //int[,] did =
+        //{
+        //    //[unit 1] : lighting relay - speakers and socket relay - AC1 - AC2 - smartswitches1 - smartswitches2 - power meter
+        //    {4,3,7,8,115,114,40 }
+        //};
         Dictionary<string, string> doorEvents = new Dictionary<string, string>
         {
             {"34","Unregistered Finger" },
@@ -245,16 +244,7 @@ namespace building_bms
             int[] temp = channels[id];
             return temp.Length;
         }
-        public void getchannels()
-        {
-            for (int i=0; i<module.Length; i++)
-            {
-                if (module[i, 0] == 1)
-                    lightChannels = +module[i, 2];
-                else if (module[i, 0] == 2)
-                    hvacChannels = +module[i, 2];
-            }
-        }
+        
 
         
 
@@ -273,35 +263,26 @@ namespace building_bms
             switch (Properties.Settings.Default.preactiveFmode)
             {
                 case 0:
-                    for (int i = 0; i < fcs.Length; i++)
-                    {
-                        if (fcs[i] == 1)
-                        {
-                            allfc_off_btn_Click(null, null);
-                            return;
-                        }
-                    }
+                    
+                       allfc_off_btn_Click(null, null);                    
                     break;
                 case 1:
-                    if (fcs[0] != 1 || fcs[3] != 1 || fcs[6] != 1 || fcs[9] != 1 || fcs[12] != 1)
-                    {
+                    
                         allfc_low_btn_Click(null, null);
-                    }
+                    
                     break;
                 case 2:
-                    if (fcs[1] != 1 || fcs[4] != 1 || fcs[7] != 1 || fcs[10] != 1 || fcs[13] != 1)
-                    {
+                    
                         allfc_med_btn_Click(null, null);
-                    }
+                    
                     break;
                 case 3:
-                    if (fcs[3] != 1 || fcs[5] != 1 || fcs[8] != 1 || fcs[11] != 1 || fcs[14] != 1)
-                    {
+                    
                         allfc_high_btn_Click(null, null);
-                    }
+                    
                     break;
             }
-            if (preactiveLight & switchs[0] == 0)
+            if (preactiveLight)
             {
                 //c.setswitch(subnet, did[ct - 7, 0], sid[ct - 7, 0], 100, direct);
             }
@@ -314,32 +295,24 @@ namespace building_bms
             switch (Properties.Settings.Default.postactiveFmode)
             {
                 case 0:
-                    for (int i = 0; i < fcs.Length; i++)
-                    {
-                        if (fcs[i] == 1)
-                        {
-                            allfc_off_btn_Click(null, null);
-                            return;
-                        }
-                    }
+                    
+                    allfc_off_btn_Click(null, null);
+                            
                     break;
                 case 1:
-                    if (fcs[0] != 1 || fcs[3] != 1 || fcs[6] != 1 || fcs[9] != 1 || fcs[12] != 1)
-                    {
+                   
                         allfc_low_btn_Click(null, null);
-                    }
+                    
                     break;
                 case 2:
-                    if (fcs[1] != 1 || fcs[4] != 1 || fcs[7] != 1 || fcs[10] != 1 || fcs[13] != 1)
-                    {
+                    
                         allfc_med_btn_Click(null, null);
-                    }
+                    
                     break;
                 case 3:
-                    if (fcs[3] != 1 || fcs[5] != 1 || fcs[8] != 1 || fcs[11] != 1 || fcs[14] != 1)
-                    {
+                    
                         allfc_high_btn_Click(null, null);
-                    }
+                   
                     break;
             }
             if (postactiveHall)
@@ -447,13 +420,14 @@ namespace building_bms
         public async void scheduler(object src, ElapsedEventArgs e)
         {
             com c = new com();
-            c.gettemp(subnet, did[ct - 7, 4], direct);
-            await Task.Delay(300);
-            c.gettemp(subnet, did[ct - 7, 5], direct);
-            await Task.Delay(300);
-            c.getvoltage(subnet, did[ct - 7, 6], direct);
-            await Task.Delay(300);
-            c.getcurrent(subnet, did[ct - 7, 6], direct);
+            //c.gettemp(subnet, did[ct - 7, 4], direct);
+            //await Task.Delay(300);
+            //c.gettemp(subnet, did[ct - 7, 5], direct);
+            //await Task.Delay(300);
+            //c.getvoltage(subnet, did[ct - 7, 6], direct);
+            //await Task.Delay(300);
+            //c.getcurrent(subnet, did[ct - 7, 6], direct);
+
             //# auto on fan coil setting timer
             if ( DateTime.Now.Hour == 0 && !Properties.Settings.Default.extraTimeReset)
             {
@@ -789,22 +763,22 @@ namespace building_bms
                     break;
 
                 case "0x3":
-                    com c3 = new com();
-                    if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2])
-                    {
-                        c3.getswitch(subnet, did[ct - 7, 2], direct);
-                    }
-                    else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 3])
-                    {
-                        c3.getswitch(subnet, did[ct - 7, 3], direct);
-                    } else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 0])
-                    {
-                        c3.getswitch(subnet, did[ct - 7, 0], direct);
-                    }
-                    else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 1])
-                    {
-                        c3.getswitch(subnet, did[ct - 7, 1], direct);
-                    }
+                    //com c3 = new com();
+                    //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2])
+                    //{
+                    //    c3.getswitch(subnet, did[ct - 7, 2], direct);
+                    //}
+                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 3])
+                    //{
+                    //    c3.getswitch(subnet, did[ct - 7, 3], direct);
+                    //} else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 0])
+                    //{
+                    //    c3.getswitch(subnet, did[ct - 7, 0], direct);
+                    //}
+                    //else if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 1])
+                    //{
+                    //    c3.getswitch(subnet, did[ct - 7, 1], direct);
+                    //}
                     break;
                 case "0xA39B":
                     //AC Respond
@@ -836,35 +810,35 @@ namespace building_bms
 
                     break;
                 case "0xD903"://voltage packet
-                    if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7,6])
-                    {
-                        volt = Double.Parse(Convert.ToInt32(p.Data[11] * 256 + p.Data[12]).ToString() + "." + p.Data[13].ToString() + p.Data[14].ToString());
-                       // double v2 = Double.Parse(Convert.ToInt32(p.Data[16] * 256 + p.Data[17]).ToString() + "." + Convert.ToInt32(p.Data[18] * 256 + p.Data[19]).ToString());
-                        //double v3 = Double.Parse(Convert.ToInt32(p.Data[20] * 256 + p.Data[21]).ToString() + "." + Convert.ToInt32(p.Data[22] * 256 + p.Data[23]).ToString());
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            v1label.Content = volt;
-                            //v2label.Content = v2;
-                            //v3label.Content = v3;
-                        }));
-                    }
+                    //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7,6])
+                    //{
+                    //    volt = Double.Parse(Convert.ToInt32(p.Data[11] * 256 + p.Data[12]).ToString() + "." + p.Data[13].ToString() + p.Data[14].ToString());
+                    //   // double v2 = Double.Parse(Convert.ToInt32(p.Data[16] * 256 + p.Data[17]).ToString() + "." + Convert.ToInt32(p.Data[18] * 256 + p.Data[19]).ToString());
+                    //    //double v3 = Double.Parse(Convert.ToInt32(p.Data[20] * 256 + p.Data[21]).ToString() + "." + Convert.ToInt32(p.Data[22] * 256 + p.Data[23]).ToString());
+                    //    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    //    {
+                    //        v1label.Content = volt;
+                    //        //v2label.Content = v2;
+                    //        //v3label.Content = v3;
+                    //    }));
+                    //}
                     
                     break;
                 case "0xD909":
-                    if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 6])
-                    {
-                        amper = Double.Parse(Convert.ToInt32(p.Data[11]).ToString() + "." + p.Data[12].ToString() + p.Data[13].ToString() + p.Data[14].ToString());
-                        //double a2 = Double.Parse(Convert.ToInt32(p.Data[16]).ToString() + "." + Convert.ToInt32(p.Data[17] * 512 + p.Data[18] * 256 + p.Data[19]).ToString());
-                        //double a3 = Double.Parse(Convert.ToInt32(p.Data[20]).ToString() + "." + Convert.ToInt32(p.Data[21] * 512 + p.Data[22] * 256 + p.Data[23]).ToString());
-                        Application.Current.Dispatcher.Invoke(new Action(async() =>
-                        {
-                            a1label.Content = amper;
-                            //a2label.Content = a2;
-                            //a3label.Content = a3;
-                            await Task.Delay(300);
-                            calcKw();
-                        }));
-                    }
+                    //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 6])
+                    //{
+                    //    amper = Double.Parse(Convert.ToInt32(p.Data[11]).ToString() + "." + p.Data[12].ToString() + p.Data[13].ToString() + p.Data[14].ToString());
+                    //    //double a2 = Double.Parse(Convert.ToInt32(p.Data[16]).ToString() + "." + Convert.ToInt32(p.Data[17] * 512 + p.Data[18] * 256 + p.Data[19]).ToString());
+                    //    //double a3 = Double.Parse(Convert.ToInt32(p.Data[20]).ToString() + "." + Convert.ToInt32(p.Data[21] * 512 + p.Data[22] * 256 + p.Data[23]).ToString());
+                    //    Application.Current.Dispatcher.Invoke(new Action(async() =>
+                    //    {
+                    //        a1label.Content = amper;
+                    //        //a2label.Content = a2;
+                    //        //a3label.Content = a3;
+                    //        await Task.Delay(300);
+                    //        calcKw();
+                    //    }));
+                    //}
                     break;
                 case "0xDA00":
                     writelog("Time request recieved from doorloger module");
@@ -1990,76 +1964,7 @@ namespace building_bms
             }
         }
 
-        public void refsw2(int n)
-        {
-            if (n != 3)
-            {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    for (int i = 0; i < switchs2.Length; i++)
-                    {
-                        //MessageBox.Show(i.ToString());
-                        //MessageBox.Show(i.ToString() + ":" +switchs[i].ToString());
-                        switch (i + 1)
-                        {
-                            case 1:
-                                speaker2_1.Click -= speaker21_Click;
-                                speaker2_1.IsChecked = Convert.ToBoolean(switchs2[i]);
-                                //tralight_on.Visibility = (sw1.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-                                speaker2_1.IsEnabled = true;
-                                speaker2_1.Click += speaker21_Click;
-                                break;
-                            case 2:
-                                speaker1.Click -= speaker1_Click;
-                                speaker1.IsChecked = Convert.ToBoolean(switchs2[i]);
-                                //rahrolight_on.Visibility = (sw2.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-                                speaker1.IsEnabled = true;
-                                speaker1.Click += speaker1_Click;
-                                break;
-                            case 3:
-                                speaker4.Click -= speaker4_Click;
-                                speaker4.IsChecked = Convert.ToBoolean(switchs2[i]);
-                                //bedroomlight_on.Visibility = (sw3.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                speaker4.IsEnabled = true;
-                                speaker4.Click += speaker4_Click;
-                                break;
-                            case 4:
-                                speaker3.Click -= speaker3_Click;
-                                speaker3.IsChecked = Convert.ToBoolean(switchs2[i]);
-                                //makeuplight_on.Visibility = (sw4.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                speaker3.IsEnabled = true;
-                                speaker3.Click += speaker3_Click;
-                                break;
-                            case 5:
-                                speaker5.Click -= speaker5_Click;
-                                speaker5.IsChecked = Convert.ToBoolean(switchs2[i]);
-                                //makeuplight_on.Visibility = (sw4.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                speaker5.IsEnabled = true;
-                                speaker5.Click += speaker5_Click;
-                                break;
-                            case 6:
-                                
-                                break;
-                            case 7:
-                                allsockets.Click -= allsockets_Click;
-                                allsockets.IsChecked = Convert.ToBoolean(switchs2[i]);
-                                //livroomlight_on.Visibility = (sw7.IsChecked == true ? Visibility.Visible : Visibility.Hidden);
-
-                                allsockets.IsEnabled = true;
-                                allsockets.Click += allsockets_Click;
-                                break;
-                        }
-                    }
-                }));
-            }
-
-
-
-        }
-
+        
         private async void alllights_on_btn_Click(object sender, RoutedEventArgs e)
         {
             com c = new com();
