@@ -16,13 +16,9 @@ namespace building_bms
     {
         private WebSocket con;//websocket connection
         private Socket Udpcon;//UDP socket for sending
-        public int cot;
 
         public com()  //Parameterized constructor
         {
-
-            //con = ws;
-
         }
 
         //send through websocket connection (!direct) it depends on server application
@@ -58,22 +54,6 @@ namespace building_bms
                 System.Diagnostics.Debug.Print("Exception:" + send_exception.Message);
             }
         }
-
-        public string[] getmsg(string data)
-        {
-            //sperating parameter in data
-            string[] msg = data.Split(',');
-            if (msg[0] != "0")
-            {
-                return msg;
-            }
-            else
-            {
-                return msg;
-            }
-
-        }
-
 
         public string changeop(UInt16 op, int n)
         {

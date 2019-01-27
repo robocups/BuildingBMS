@@ -40,23 +40,23 @@ namespace building_bms
         string currentMode = "deactive";
 
         int[,] module = {
-            {235,12},
-            {6,4},
-            {55,4},
+            //{235,12},
+            {11,4},
+            {5,8},
 
         };
         int lightChannels=0, hvacChannels=0;
-        int subnet = 1;
+        int subnet = 106;
         Dictionary<int, int[]> channels = new Dictionary<int, int[]>()
         {
-            {235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
-            {6, new int[] {0,0,0,0} },
-            {55, new int[] {0,0,0,0} }
+            //{235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
+            {11, new int[] {0,0,0,0} },
+            {5, new int[] {0,0,0,0,0,0,0,0} }
         };
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{55,1} },
-            {"sw2",new int[]{55,2} },
+            {"sw1",new int[]{5,5} },
+            {"sw2",new int[]{5,6} },
             {"sw3",new int[]{55,3} },
             {"sw4",new int[]{55,4} },
             {"sw5",new int[]{235,7} },
@@ -80,18 +80,13 @@ namespace building_bms
 
             {"Sockets",new int[]{6,0} },
 
-            {"fc1", new int[]{235,11,1} },
+            {"fc1", new int[]{11,11,1,3,2,1} },
             {"fc2", new int[]{235,11,2 } },
             {"fc3", new int[]{6,0,3,2,1 } },
             {"fc4", new int[]{235,11,3 } },
             {"fc5", new int[]{0,0,0,0,0 } },
         };
-        //new DynamicJson() { }
-        Dictionary<string, dynamic> sws = new Dictionary<string, dynamic>()
-        {
-            {"fc1", new {high=new {did=6,cid=4},medium=new {did=6,cid=3},low=new {did=6,cid=2} } },
-        };
-
+        
         int[,] speaker =
         {
             {2,1,4,3,5}
@@ -132,7 +127,7 @@ namespace building_bms
             netlog.Visibility = Visibility.Visible;
             server();
             UI();
-            fillChannels();
+            //fillChannels();
             myTimer.Elapsed += new ElapsedEventHandler(scheduler);
             inbioTimer.Elapsed += new ElapsedEventHandler(log);
             hourlyTimer.Elapsed += new ElapsedEventHandler(hourlyJobs);
@@ -252,48 +247,8 @@ namespace building_bms
                     hvacChannels = +module[i, 2];
             }
         }
-        public bool islightModule(int id)
-        {
-            //for (int i=0; i<module.GetLength(0); i++)
-            //{
-            //    if (module[i, 1] == id && module[i, 0] == 1)
-            //        return true;  
-            //}
-            //return false;
-            foreach (var kvp in switches.ToArray())
-            {
-                if ((kvp.Value)[0]== id && kvp.Key.Substring(0,1)=="s")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public bool ishvacModule(int id)
-        {
-            //for (int i = 0; i < module.GetLength(0); i++)
-            //{
-            //    if (module[i, 1] == id && module[i, 0] == 2)
-            //        return true;
-            //}
-            //return false;
-            foreach (var kvp in switches.ToArray())
-            {
-                if ((kvp.Value)[0] == id && kvp.Key.Substring(0, 1) == "f")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public void setSwitch(ToggleSwitch sw)
-        {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
 
-
-            }));
-        }
+        
 
         public void activeMethod()
         {
@@ -618,22 +573,12 @@ namespace building_bms
             }
                 
             ct = 7;
-            fc1_off.Checked -= fc1_off_Checked;
-            fc2_high_off.Checked -= fc2_high_off_Checked;
-            fc3_off.Checked -= fc3_off_Checked;
-            fc4_off.Checked -= fc4_off_Checked;
-            fc5_off.Checked -= fc5_off_Checked;
-            fc1_off.IsChecked = fc2_high_off.IsChecked = fc3_off.IsChecked = fc4_off.IsChecked = fc5_off.IsChecked = true;
-            fc1_off.Checked += fc1_off_Checked;
-            fc2_high_off.Checked += fc2_high_off_Checked;
-            fc3_off.Checked += fc3_off_Checked;
-            fc4_off.Checked += fc4_off_Checked;
-            fc5_off.Checked += fc5_off_Checked;
+            
             await Task.Delay(800);
             for(int i = 0; i<module.GetLength(0); i++)
             {
                 com c = new com();
-                c.getswitch(subnet, module[i,1], direct);
+                c.getswitch(subnet, module[i,0], direct);
                 await Task.Delay(300);
             }
             
@@ -823,14 +768,16 @@ namespace building_bms
                     id = Convert.ToInt16(p.OriginalDeviceID);
                     if (channels.ContainsKey((id)))
                     {
-                        int[] s = new int[channelnumber];
+                        
                         for (int i = 12; i < 12 + channelnumber; i++)
                         {
                             channels[id][i-12] = (Convert.ToInt16(p.Data[i]) == 0) ? 0 : 1;
                         }
                         refsw(id);
+                        reffc(id);
+
                     }
-                    
+
                     break;
                 case "0xEFFF":
                     id = Convert.ToInt16(p.OriginalDeviceID);
@@ -945,7 +892,7 @@ namespace building_bms
 
             await Task.Delay(500);
             com c = new com();
-            for(int i=0; i<module.Length; i++)
+            for(int i=0; i<module.GetLength(0); i++)
             {
                 c.getswitch(subnet, module[i,0], direct);
                 await Task.Delay(300);
@@ -1445,26 +1392,18 @@ namespace building_bms
             //int n is the channels index
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                fc1_off.Checked -= fc1_off_Checked;
-                fc2_high_off.Checked -= fc2_high_off_Checked;
-                fc3_off.Checked -= fc3_off_Checked;
-                fc4_off.Checked -= fc4_off_Checked;
-                fc5_off.Checked -= fc5_off_Checked;
-                //fc1_off.IsChecked = fc2_high_off.IsChecked = fc3_off.IsChecked = fc4_off.IsChecked = fc5_off.IsChecked = true;
-                fc1_off.Checked += fc1_off_Checked;
-                fc2_high_off.Checked += fc2_high_off_Checked;
-                fc3_off.Checked += fc3_off_Checked;
-                fc4_off.Checked += fc4_off_Checked;
-                fc5_off.Checked += fc5_off_Checked;
-                for (int i = 0; i < switches.LongCount(); i++)
-                {
-                    int[] data = switches.ContainsKey("fc" + (i + 1).ToString()) ? switches["fc" + (i + 1).ToString()] : null;
-                    if (data != null && data[0] == n)
-                    {
-                        
-                    }
-
-                }
+                //fc1_off.Checked -= fc1_off_Checked;
+                //fc2_high_off.Checked -= fc2_high_off_Checked;
+                //fc3_off.Checked -= fc3_off_Checked;
+                //fc4_off.Checked -= fc4_off_Checked;
+                //fc5_off.Checked -= fc5_off_Checked;
+                ////fc1_off.IsChecked = fc2_high_off.IsChecked = fc3_off.IsChecked = fc4_off.IsChecked = fc5_off.IsChecked = true;
+                //fc1_off.Checked += fc1_off_Checked;
+                //fc2_high_off.Checked += fc2_high_off_Checked;
+                //fc3_off.Checked += fc3_off_Checked;
+                //fc4_off.Checked += fc4_off_Checked;
+                //fc5_off.Checked += fc5_off_Checked;
+                
             }));
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -1472,18 +1411,34 @@ namespace building_bms
                 {
                     if (switches.ContainsKey("fc" + (i + 1).ToString()) && switches["fc" + (i + 1).ToString()][0] == n)
                     {
-                        
                         int s = 3;
-                        for (int j = 2; j < 5; j++)
+                        if(switches["fc" + (i + 1).ToString()][1] == 11)
                         {
-                            
-                            if(channels[n][switches["fc" + (i + 1).ToString()][j]] == 1)
+                            for (int j = 3; j < 6; j++)
                             {
-                                
-                                break;
+
+                                if (channels[n][switches["fc" + (i + 1).ToString()][j]-1] == 1)
+                                {
+
+                                    break;
+                                }
+                                s--;
                             }
-                            s--;
+                        } 
+                        else
+                        {
+                            for (int j = 2; j < 5; j++)
+                            {
+
+                                if (channels[n][switches["fc" + (i + 1).ToString()][j]-1] == 1)
+                                {
+
+                                    break;
+                                }
+                                s--;
+                            }
                         }
+                        
 
                         
                         fcSet("fc" + (i + 1).ToString(), s);
@@ -1783,8 +1738,18 @@ namespace building_bms
         private async void fc2_high_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(1, "fc2");
-            c.setswitch(subnet, switches["fc2"][0], switches["fc2"][1], 100, direct);
+            if (switches["fc2"][1] != 11)
+            {
+                for (int i = 2; i < switches["fc2"].Length; i++)
+                {
+                    c.setswitch(subnet, switches["fc2"][0], switches["fc2"][i], 0, direct);
+                    await Task.Delay(200);
+                }
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc1"][0], switches["fc1"][2], 0, direct);
+            }
         }
 
         private async void fc2_med_Checked(object sender, RoutedEventArgs e)
