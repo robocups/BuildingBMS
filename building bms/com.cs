@@ -355,29 +355,7 @@ namespace building_bms
             }
 
         }
-        public void setuv(int n, int id, int chno, int val, bool d)
-        {
-            //if (direct)
-            //{
-            //    byte[] c = { Convert.ToByte(chno), Convert.ToByte(val) };
-            //    directcmd(0xE01C, Convert.ToByte(n), Convert.ToByte(id), c);
-            //}
-            //else
-            //{
-            //    string[] cmd = { changeop(0xE01C, n), n.ToString(), id.ToString(), chno.ToString(), val.ToString() };
-
-            //    send(cmd);
-            //}
-            dynamic json = new DynamicJson();
-            json.type = "call";
-            json.area = "1";
-            json.building = n.ToString();
-            json.action = "setuv";
-            json.did = id.ToString();
-            json.channel = chno.ToString();
-            json.state = val == 255 ? "on" : "off";
-            send(json);
-        }
+        
 
         public void directcmd(UInt16 op, byte sid, byte did, byte[] content)
         {

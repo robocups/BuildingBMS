@@ -42,7 +42,11 @@ namespace building_bms
         int[,] module = {
             //{235,12},
             {11,4},
+            {12,4},
+            {13,4},
+            {14,4},
             {5,8},
+            {6,8},
 
         };
         int lightChannels=0, hvacChannels=0;
@@ -51,40 +55,44 @@ namespace building_bms
         {
             //{235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
             {11, new int[] {0,0,0,0} },
-            {5, new int[] {0,0,0,0,0,0,0,0} }
+            {12, new int[] {0,0,0,0} },
+            {13, new int[] {0,0,0,0} },
+            {14, new int[] {0,0,0,0} },
+            {5, new int[] {0,0,0,0,0,0,0,0} },
+            {6, new int[] {0,0,0,0,0,0,0,0} }
         };
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{5,5} },
-            {"sw2",new int[]{5,6} },
-            {"sw3",new int[]{55,3} },
-            {"sw4",new int[]{55,4} },
-            {"sw5",new int[]{235,7} },
-            {"sw6",new int[]{235,8} },
-            {"sw7",new int[]{235,9} },
+            {"sw1",new int[]{5,5} },//S1 main
+            {"sw2",new int[]{5,6} },//S1 hallo
+            {"sw3",new int[]{6,3} },//S2 main
+            {"sw4",new int[]{6,4} },//S2 hallo
+            {"sw5",new int[]{5,7} },//S3 main
+            {"sw6",new int[]{5,8} },//S3 hallo
+            {"sw7",new int[]{6,6} },//S3 alt
 
-            {"sw8",new int[]{0,4} },
-            {"sw9",new int[]{0,3} },
-            {"sw10",new int[]{0,0} },
-            {"sw11",new int[]{0,7} },
-            {"sw12",new int[]{0,8} },
-            {"sw13",new int[]{0,2} },
-            {"sw14",new int[]{0,1} },
-            {"sw15",new int[]{0,6} },
+            {"sw8",new int[]{5,1} },//S6 main
+            {"sw9",new int[]{5,2} },//S6 hallo
+            {"sw10",new int[]{5,4} },//S5 hallow 2
+            {"sw11",new int[]{5,3} },//S5 main
+            {"sw12",new int[]{5,4} },//S5 hallow 1
+            {"sw13",new int[]{6,1} },//S4 main
+            {"sw14",new int[]{6,2} },//S4 hallo
+            {"sw15",new int[]{0,6} },//kitchen
 
-            {"sp1",new int[]{0,6} },
-            {"sp2",new int[]{0,6} },
-            {"sp3",new int[]{0,6} },
-            {"sp4",new int[]{0,6} },
-            {"sp5",new int[]{0,6} },
+            {"sp1",new int[]{14,4} },
+            {"sp2",new int[]{14,4} },
+            {"sp3",new int[]{14,4} },
+            {"sp4",new int[]{14,4} },
+            {"sp5",new int[]{14,4} },
 
-            {"Sockets",new int[]{6,0} },
+            {"Sockets",new int[]{0,0} },
 
-            {"fc1", new int[]{11,11,1,3,2,1} },
-            {"fc2", new int[]{235,11,2 } },
-            {"fc3", new int[]{6,0,3,2,1 } },
-            {"fc4", new int[]{235,11,3 } },
-            {"fc5", new int[]{0,0,0,0,0 } },
+            {"fc1", new int[]{14,0,3,2,1} },
+            {"fc2", new int[]{13,11,1,4,3,2 } },
+            {"fc3", new int[]{12,0,2,1,1 } },
+            {"fc4", new int[]{ 11, 11, 1, 3, 2, 1 } },
+            {"fc5", new int[]{12,0,4,4,3 } },
         };
         
         int[,] speaker =
@@ -571,9 +579,6 @@ namespace building_bms
                 if (switches["sw" + (i + 1).ToString()][0] == 0)
                     disableSwitch("sw" + (i + 1).ToString());
             }
-                
-            ct = 7;
-            
             await Task.Delay(800);
             for(int i = 0; i<module.GetLength(0); i++)
             {
@@ -581,8 +586,6 @@ namespace building_bms
                 c.getswitch(subnet, module[i,0], direct);
                 await Task.Delay(300);
             }
-            
-            
             //c.getswitch(subnet, did[ct - 7, 1], direct);
             //await Task.Delay(300);
             //c.getswitch(subnet, did[ct - 7, 2], direct);
@@ -1671,7 +1674,7 @@ namespace building_bms
             {
                 if(i != n)
                 {
-                    c.setswitch(subnet, switches[name][0], switches[name][i], 0, direct);
+                    c.setswitch(subnet, switches[name][0], switches[name][i+1], 0, direct);
                     await Task.Delay(200);
                 }
             }
@@ -1696,7 +1699,7 @@ namespace building_bms
             com c = new com();
             if (switches["fc1"][1] != 11)
             {
-                groupCheck(1, "fc1");
+                groupCheck(2, "fc1");
                 await Task.Delay(400);
                 c.setswitch(subnet, switches["fc1"][0], switches["fc1"][3], 100, direct);
             }
@@ -1710,7 +1713,7 @@ namespace building_bms
             com c = new com();
             if (switches["fc1"][1] != 11)
             {
-                groupCheck(1, "fc1");
+                groupCheck(3, "fc1");
                 await Task.Delay(400);
                 c.setswitch(subnet, switches["fc1"][0], switches["fc1"][4], 100, direct);
             }
@@ -1740,6 +1743,51 @@ namespace building_bms
             com c = new com();
             if (switches["fc2"][1] != 11)
             {
+                groupCheck(1, "fc2");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc2"][0], switches["fc2"][2], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc2"][0], switches["fc2"][2], 3, direct);
+            }
+        }
+
+        private async void fc2_med_Checked(object sender, RoutedEventArgs e)
+        {
+            com c = new com();
+            if (switches["fc2"][1] != 11)
+            {
+                groupCheck(2, "fc2");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc2"][0], switches["fc2"][3], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc2"][0], switches["fc2"][2], 2, direct);
+            }
+        }
+
+        private async void fc2_low_Checked(object sender, RoutedEventArgs e)
+        {
+            com c = new com();
+            if (switches["fc2"][1] != 11)
+            {
+                groupCheck(3, "fc2");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc2"][0], switches["fc2"][4], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc2"][0], switches["fc2"][2], 1, direct);
+            }
+        }
+        
+        private async void fc2_high_off_Checked(object sender, RoutedEventArgs e)
+        {
+            com c = new com();
+            if (switches["fc2"][1] != 11)
+            {
                 for (int i = 2; i < switches["fc2"].Length; i++)
                 {
                     c.setswitch(subnet, switches["fc2"][0], switches["fc2"][i], 0, direct);
@@ -1748,126 +1796,197 @@ namespace building_bms
             }
             else
             {
-                c.setfan(subnet, switches["fc1"][0], switches["fc1"][2], 0, direct);
-            }
-        }
-
-        private async void fc2_med_Checked(object sender, RoutedEventArgs e)
-        {
-            com c = new com();
-            groupCheck(2, "fc2");
-            c.setswitch(subnet, switches["fc2"][0], switches["fc2"][2], 100, direct);
-        }
-
-        private async void fc2_low_Checked(object sender, RoutedEventArgs e)
-        {
-            com c = new com();
-            groupCheck(3, "fc2");
-            c.setswitch(subnet, switches["fc2"][0], switches["fc2"][3], 100, direct);
-        }
-        
-        private async void fc2_high_off_Checked(object sender, RoutedEventArgs e)
-        {
-            com c = new com();
-
-            for (int i = 1; i < switches["fc2"].Length; i++)
-            {
-                c.setswitch(subnet, switches["fc2"][0], switches["fc2"][i], 0, direct);
-                await Task.Delay(200);
+                c.setfan(subnet, switches["fc2"][0], switches["fc2"][2], 0, direct);
             }
         }
         private async void fc3_high_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(1, "fc3");
-            c.setswitch(subnet, switches["fc3"][0], switches["fc3"][1], 100, direct);
+            if (switches["fc3"][1] != 11)
+            {
+                groupCheck(1, "fc3");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc3"][0], switches["fc3"][2], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc3"][0], switches["fc3"][2], 3, direct);
+            }
         }
 
         private async void fc3_med_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(2, "fc3");
-            c.setswitch(subnet, switches["fc3"][0], switches["fc3"][2], 100, direct);
+            if (switches["fc3"][1] != 11)
+            {
+                groupCheck(2, "fc3");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc3"][0], switches["fc3"][3], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc3"][0], switches["fc3"][2], 2, direct);
+            }
         }
 
         private async void fc3_low_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(3, "fc3");
-            c.setswitch(subnet, switches["fc3"][0], switches["fc3"][3], 100, direct);
+            if (switches["fc3"][1] != 11)
+            {
+                groupCheck(3, "fc3");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc3"][0], switches["fc3"][4], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc3"][0], switches["fc3"][2], 1, direct);
+            }
         }
 
         private async void fc3_off_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-
-            for (int i = 1; i < switches["fc3"].Length; i++)
+            if (switches["fc3"][1] != 11)
             {
-                c.setswitch(subnet, switches["fc3"][0], switches["fc3"][i], 0, direct);
-                await Task.Delay(200);
+                for (int i = 2; i < switches["fc3"].Length; i++)
+                {
+                    c.setswitch(subnet, switches["fc3"][0], switches["fc3"][i], 0, direct);
+                    await Task.Delay(200);
+                }
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc3"][0], switches["fc3"][2], 0, direct);
             }
         }
         private async void fc4_high_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(1, "fc4");
-            c.setswitch(subnet, switches["fc4"][0], switches["fc4"][1], 100, direct);
+            if (switches["fc4"][1] != 11)
+            {
+                groupCheck(1, "fc4");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc4"][0], switches["fc4"][2], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc4"][0], switches["fc4"][2], 3, direct);
+            }
+
         }
 
         private async void fc4_med_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(2, "fc4");
-            c.setswitch(subnet, switches["fc4"][0], switches["fc4"][2], 100, direct);
+            if (switches["fc4"][1] != 11)
+            {
+                groupCheck(2, "fc4");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc4"][0], switches["fc4"][3], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc4"][0], switches["fc4"][2], 2, direct);
+            }
+
         }
 
         private async void fc4_low_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(3, "fc4");
-            c.setswitch(subnet, switches["fc4"][0], switches["fc4"][3], 100, direct);
+            if (switches["fc4"][1] != 11)
+            {
+                groupCheck(3, "fc4");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc4"][0], switches["fc4"][4], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc4"][0], switches["fc4"][2], 1, direct);
+            }
+
         }
 
         private async void fc5_high_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(1, "fc5");
-            c.setswitch(subnet, switches["fc5"][0], switches["fc5"][1], 100, direct);
+            if (switches["fc5"][1] != 11)
+            {
+                groupCheck(1, "fc5");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc5"][0], switches["fc5"][2], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc5"][0], switches["fc5"][2], 3, direct);
+            }
+
         }
 
         private async void fc5_med_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(2, "fc5");
-            c.setswitch(subnet, switches["fc5"][0], switches["fc5"][2], 100, direct);
+            if (switches["fc5"][1] != 11)
+            {
+                groupCheck(2, "fc5");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc5"][0], switches["fc5"][3], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc5"][0], switches["fc5"][2], 2, direct);
+            }
+
         }
 
         private async void fc5_low_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            groupCheck(3, "fc5");
-            c.setswitch(subnet, switches["fc5"][0], switches["fc5"][3], 100, direct);
+            if (switches["fc5"][1] != 11)
+            {
+                groupCheck(3, "fc5");
+                await Task.Delay(400);
+                c.setswitch(subnet, switches["fc5"][0], switches["fc5"][4], 100, direct);
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc5"][0], switches["fc5"][2], 1, direct);
+            }
+
         }
 
         private async void fc4_off_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-
-            for (int i = 1; i < switches["fc4"].Length; i++)
+            if (switches["fc4"][1] != 11)
             {
-                c.setswitch(subnet, switches["fc4"][0], switches["fc3"][i], 0, direct);
-                await Task.Delay(200);
+                for (int i = 2; i < switches["fc4"].Length; i++)
+                {
+                    c.setswitch(subnet, switches["fc4"][0], switches["fc4"][i], 0, direct);
+                    await Task.Delay(200);
+                }
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc4"][0], switches["fc4"][2], 0, direct);
             }
         }
 
         private async void fc5_off_Checked(object sender, RoutedEventArgs e)
         {
             com c = new com();
-
-            for (int i = 1; i < switches["fc5"].Length; i++)
+            if (switches["fc5"][1] != 11)
             {
-                c.setswitch(subnet, switches["fc5"][0], switches["fc3"][i], 0, direct);
-                await Task.Delay(200);
+                for (int i = 2; i < switches["fc5"].Length; i++)
+                {
+                    c.setswitch(subnet, switches["fc5"][0], switches["fc5"][i], 0, direct);
+                    await Task.Delay(200);
+                }
+            }
+            else
+            {
+                c.setfan(subnet, switches["fc5"][0], switches["fc5"][2], 0, direct);
             }
         }
 
