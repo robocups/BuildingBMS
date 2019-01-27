@@ -857,11 +857,11 @@ namespace building_bms
 
         }
 
-        public void calcKw()
-        {
-            kW = (volt * amper) / 1000;
-            kWlabel.Content = kW.ToString("0.00");
-        }
+        //public void calcKw()
+        //{
+        //    kW = (volt * amper) / 1000;
+        //    kWlabel.Content = kW.ToString("0.00");
+        //}
         public async void queue(int n)
         {
             for (int i = 0; i < 6; i++)
@@ -1261,10 +1261,20 @@ namespace building_bms
                         if(switches.ContainsKey("sw" + (i + 1).ToString()) && switches["sw" + (i + 1).ToString()][0]==n)
                         {
                             switchSet("sw" + (i + 1).ToString(), channels[n][switches["sw" + (i + 1).ToString()][1]-1]==0?false:true);
-                        }   
+                        }
+                        
                     }
+                    for(int i = 0; i<switches.LongCount(); i++)
+                    {
+                        if (switches.ContainsKey("sp" + (i + 1).ToString()) && switches["sp" + (i + 1).ToString()][0] == n)
+                        {
+                            switchSet("sp" + (i + 1).ToString(), channels[n][switches["sp" + (i + 1).ToString()][1] - 1] == 0 ? false : true);
+                        }
+                    }
+
                 }));
         }
+
         public void switchSet(string sw, bool state)
         {
             switch (sw)
@@ -1358,6 +1368,36 @@ namespace building_bms
                     sw15.IsChecked = state;
                     sw15.IsEnabled = true;
                     sw15.Click += sw15_Click;
+                    break;
+                case "sp1":
+                    speaker1.Click -= speaker1_Click;
+                    speaker1.IsChecked = state;
+                    speaker1.IsEnabled = true;
+                    speaker1.Click += speaker1_Click;
+                    break;
+                case "sp2":
+                    speaker2_1.Click -= speaker21_Click;
+                    speaker2_1.IsChecked = state;
+                    speaker2_1.IsEnabled = true;
+                    speaker2_1.Click += speaker21_Click;
+                    break;
+                case "sp3":
+                    speaker3.Click -= speaker3_Click;
+                    speaker3.IsChecked = state;
+                    speaker3.IsEnabled = true;
+                    speaker3.Click += speaker3_Click;
+                    break;
+                case "sp4":
+                    speaker4.Click -= speaker4_Click;
+                    speaker4.IsChecked = state;
+                    speaker4.IsEnabled = true;
+                    speaker4.Click += speaker4_Click;
+                    break;
+                case "sp5":
+                    speaker5.Click -= speaker5_Click;
+                    speaker5.IsChecked = state;
+                    speaker5.IsEnabled = true;
+                    speaker5.Click += speaker5_Click;
                     break;
                 default:
 
