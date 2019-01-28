@@ -62,22 +62,22 @@ namespace building_bms
         };
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{5,5} },//S1 main
-            {"sw2",new int[]{5,6} },//S1 hallo
-            {"sw3",new int[]{6,3} },//S2 main
-            {"sw4",new int[]{6,4} },//S2 hallo
-            {"sw5",new int[]{5,7} },//S3 main
-            {"sw6",new int[]{5,8} },//S3 hallo
-            {"sw7",new int[]{6,6} },//S3 alt
+            {"sw1",new int[]{6,4,12} },//S1 hallo
+            {"sw2",new int[]{6,3,10} },//S1 main
+            {"sw3",new int[]{5,5,10} },//S2 main
+            {"sw4",new int[]{5,6,12} },//S2 hallo
+            {"sw5",new int[]{5,7,10} },//S3 main
+            {"sw6",new int[]{5,8,12} },//S3 hallo
+            {"sw7",new int[]{6,6,10} },//S3 alt
 
-            {"sw8",new int[]{5,1} },//S6 main
-            {"sw9",new int[]{5,2} },//S6 hallo
-            {"sw10",new int[]{5,4} },//S5 hallow 2
-            {"sw11",new int[]{5,3} },//S5 main
-            {"sw12",new int[]{5,4} },//S5 hallow 1
-            {"sw13",new int[]{6,1} },//S4 main
-            {"sw14",new int[]{6,2} },//S4 hallo
-            {"sw15",new int[]{0,6} },//kitchen
+            {"sw8",new int[]{5,1,10} },//S6 main
+            {"sw9",new int[]{5,2,12} },//S6 hallo
+            {"sw10",new int[]{5,4,12} },//S5 hallow 2
+            {"sw11",new int[]{5,3,10} },//S5 main
+            {"sw12",new int[]{5,4,12} },//S5 hallow 1
+            {"sw13",new int[]{6,1,10} },//S4 main
+            {"sw14",new int[]{6,2,12} },//S4 hallo
+            {"sw15",new int[]{0,6,10} },//kitchen
 
             {"sp1",new int[]{14,4} },
             {"sp2",new int[]{14,4} },
@@ -114,7 +114,7 @@ namespace building_bms
         int activeStopH =-1, activeStopM = -1,preactiveStopH =-1, preactiveStopM = -1, postactiveStopH = -1, postactiveStopM = -1;
         int activeStartH=-1, activeStartM=-1, preactiveStartH=-1, preactiveStartM=-1, postactiveStartH=-1, postactiveStartM=-1, postactiveFmode=-1,preactiveFmode=-1; 
 
-        double volt, amper, kW;
+        //double volt, amper, kW;
         public string[] data;
 
         //timers flags
@@ -140,7 +140,7 @@ namespace building_bms
             hourlyTimer.Elapsed += new ElapsedEventHandler(hourlyJobs);
             deactiveTimer.Elapsed += new ElapsedEventHandler(deactiveJobs);
             //inbioTimer.Enabled = true;
-            //myTimer.Enabled = true;
+            myTimer.Enabled = true;
             
             //accTab.Visibility = Visibility.Hidden;
             //generalTab.Visibility = Visibility.Hidden;
@@ -738,8 +738,12 @@ namespace building_bms
                         refsw(id);
                         reffc(id);
                     }
-                    
-                    break;
+                    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false & !timerCommand)
+                    {
+                        deactiveTimer.Enabled = true;
+                    }
+
+                        break;
                 case "0x34"://channels state
                     int channelnumber = Convert.ToInt16(p.Data[11]);
                     id = Convert.ToInt16(p.OriginalDeviceID);
@@ -785,6 +789,10 @@ namespace building_bms
                     id = Convert.ToInt16(p.OriginalDeviceID);
                     com c4 = new com();
                     c4.getswitch(subnet, id, direct);
+                    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false & !timerCommand)
+                    {
+                        deactiveTimer.Enabled = true;
+                    }
                     break;
                 case "0xE3E8"://temp respond
                     //if (Convert.ToInt16(p.OriginalDeviceID) == 115)
@@ -2008,87 +2016,101 @@ namespace building_bms
         private async void alllights_on_btn_Click(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            for (int i=1; i<16; i++)
+            for (int i = 0; i < switches.LongCount(); i++)
             {
-                c.setswitch(subnet, switches["sw"+i.ToString()][0], switches["sw" + i.ToString()][1], 100, direct);
-                await Task.Delay(200);
+                if (switches.ContainsKey("sw" + (i + 1).ToString()) && switches["sw" + (i + 1).ToString()][0] != 0 && switches["sw" + (i + 1).ToString()][2]==10)
+                {
+                    c.setswitch(subnet, switches["sw" + (i + 1).ToString()][0], switches["sw" + (i + 1).ToString()][1], 100, direct);
+                    await Task.Delay(300);
+                }
             }
         }
 
         private async void alllights_off_btn_Click(object sender, RoutedEventArgs e)
         {
             com c = new com();
-            for (int i = 1; i < 16; i++)
+            for (int i = 0; i < switches.LongCount(); i++)
             {
-                c.setswitch(subnet, switches["sw" + i.ToString()][0], switches["sw" + i.ToString()][1], 0, direct);
-                await Task.Delay(200);
+                if (switches.ContainsKey("sw" + (i + 1).ToString()) && switches["sw" + (i + 1).ToString()][0] != 0)
+                {
+                    c.setswitch(subnet, switches["sw" + (i + 1).ToString()][0], switches["sw" + (i + 1).ToString()][1], 0, direct);
+                    await Task.Delay(300);
+                }
             }
         }
 
         private async void allhallights_off_Click(object sender, RoutedEventArgs e)
         {
-            //com c = new com();
-            //c.setswitch(subnet, did[ct - 7, 0], 7, 0, direct);
-            //await Task.Delay(400);
-            //c.setswitch(subnet, did[ct - 7, 0], 5, 0, direct);
-            //await Task.Delay(400);
-            //c.setswitch(subnet, did[ct - 7, 0], 2, 0, direct);
-            //await Task.Delay(400);
-            //c.setswitch(subnet, did[ct - 7, 0], 14, 0, direct);
-            //await Task.Delay(400);
-            //c.setswitch(subnet, did[ct - 7, 0], 12, 0, direct);
-            //await Task.Delay(400);
-            //c.setswitch(subnet, did[ct - 7, 0], 11, 0, direct);
-            //await Task.Delay(400);
-            //c.setswitch(subnet, did[ct - 7, 0], 19, 0, direct);
-            ////await Task.Delay(400);
+            com c = new com();
+            for(int i=0; i < switches.LongCount(); i++)
+            {
+                if(switches.ContainsKey("sw" + (i + 1).ToString()) && switches["sw"+(i+1).ToString()][0]!=0 && switches["sw" + (i + 1).ToString()][2] == 12)
+                {
+                    c.setswitch(subnet, switches["sw" + (i + 1).ToString()][0], switches["sw" + (i + 1).ToString()][1], 0, direct);
+                    await Task.Delay(300);
+                }
+            }
+
         }
 
         private async void allfc_off_btn_Click(object sender, RoutedEventArgs e)
         {
-            com c = new com();
-            for (int i = 1; i < 6; i++)
-            {
-                c.setswitch(subnet, switches["fc" + i.ToString()][0], switches["fc" + i.ToString()][1], 0, direct);
-                await Task.Delay(150);
-                c.setswitch(subnet, switches["fc" + i.ToString()][0], switches["fc" + i.ToString()][2], 0, direct);
-                await Task.Delay(150);
-                c.setswitch(subnet, switches["fc" + i.ToString()][0], switches["fc" + i.ToString()][3], 0, direct);
-                await Task.Delay(150);
-            }
+            fc1_off_Checked(null, null);
+            await Task.Delay(400);
+            fc2_high_off_Checked(null, null);
+            await Task.Delay(400);
+            fc3_off_Checked(null, null);
+            await Task.Delay(400);
+            fc4_off_Checked(null, null);
+            await Task.Delay(400);
+            fc5_off_Checked(null, null);
+            await Task.Delay(400);
+
         }
 
         private async void allfc_low_btn_Click(object sender, RoutedEventArgs e)
         {
-            com c = new com();
-            for (int i = 1; i < 6; i++)
-            {
-                groupCheck(3, "fc"+i.ToString());
-                c.setswitch(subnet, switches["fc" + i.ToString()][0], switches["fc" + i.ToString()][3], 100, direct);
-                await Task.Delay(200);
-            }
+            fc1_low_Checked(null, null);
+            await Task.Delay(400);
+            fc2_low_Checked(null, null);
+            await Task.Delay(400);
+            fc3_low_Checked(null, null);
+            await Task.Delay(400);
+            fc4_low_Checked(null, null);
+            await Task.Delay(400);
+            fc5_low_Checked(null, null);
+            await Task.Delay(400);
+
         }
 
         private async void allfc_med_btn_Click(object sender, RoutedEventArgs e)
         {
-            com c = new com();
-            for (int i = 1; i < 6; i++)
-            {
-                groupCheck(2, "fc" + i.ToString());
-                c.setswitch(subnet, switches["fc" + i.ToString()][0], switches["fc" + i.ToString()][2], 100, direct);
-                await Task.Delay(200);
-            }
+            fc1_med_Checked(null, null);
+            await Task.Delay(400);
+            fc2_med_Checked(null, null);
+            await Task.Delay(400);
+            fc3_med_Checked(null, null);
+            await Task.Delay(400);
+            fc4_med_Checked(null, null);
+            await Task.Delay(400);
+            fc5_med_Checked(null, null);
+            await Task.Delay(400);
+
         }
 
         private async void allfc_high_btn_Click(object sender, RoutedEventArgs e)
         {
-            com c = new com();
-            for (int i = 1; i < 6; i++)
-            {
-                groupCheck(1, "fc" + i.ToString());
-                c.setswitch(subnet, switches["fc" + i.ToString()][0], switches["fc" + i.ToString()][1], 100, direct);
-                await Task.Delay(200);
-            }
+            fc1_high_Checked(null, null);
+            await Task.Delay(400);
+            fc2_high_Checked(null, null);
+            await Task.Delay(400);
+            fc3_high_Checked(null, null);
+            await Task.Delay(400);
+            fc4_high_Checked(null, null);
+            await Task.Delay(400);
+            fc5_high_Checked(null, null);
+            await Task.Delay(400);
+
         }
 
         
