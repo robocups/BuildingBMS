@@ -159,10 +159,10 @@
             <Button Style="{DynamicResource SquareButtonStyle}" x:Name="btn_cot1"  HorizontalAlignment="Left" Margin="0,182,0,0" VerticalAlignment="Top" Width="124" Height="60" Background="{x:Null}" BorderThickness="0" BorderBrush="{x:Null}" Foreground="#FFDEDEDE" FontSize="24" FontWeight="Bold" FontFamily="B Yekan" Click="btn_cot1_Click">
                 <Grid Width="123" Height="58" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Ellipse x:Name="alarmicon1" Fill="#FF950000" HorizontalAlignment="Left" Height="25" Margin="10,14,0,0" VerticalAlignment="Top" Width="25" Visibility="Hidden"/>
-                    <Label x:Name="ctg1" Content="واحد 1" Margin="0,0,21,5" HorizontalAlignment="Right" Foreground="#FFDEDEDE" Width="81" FontSize="24" Height="48" VerticalAlignment="Bottom" />
+                    <Label x:Name="ctg1" Content="واحد 7" Margin="0,0,21,5" HorizontalAlignment="Right" Foreground="#FFDEDEDE" Width="81" FontSize="24" Height="48" VerticalAlignment="Bottom" />
                 </Grid>
             </Button>
-            
+
             <Button x:Name="setting_btn" Click="setting_btn_Click" Content="" HorizontalAlignment="Left" Margin="36,625,0,0" VerticalAlignment="Top" Width="52" Height="50">
                 <Button.OpacityMask>
                     <ImageBrush ImageSource="setting.png"/>
@@ -409,11 +409,11 @@
             <StatusBar Margin="0,731,0,0" Background="#FF333333">
                 <Label x:Name="constatus" Content="" FontSize="16" FontFamily="B Yekan" Foreground="Gainsboro"/>
             </StatusBar>
-            <Rectangle Fill="#FF333333" HorizontalAlignment="Left" Height="52" Margin="449,10,0,0" VerticalAlignment="Top" Width="353"/>
-            <Label x:Name="kWlabel" Content="" HorizontalAlignment="Left" Margin="652,13,0,0" VerticalAlignment="Top" Width="150" Height="44" FontSize="24" RenderTransformOrigin="0.007,0.53" Background="{x:Null}" Foreground="WhiteSmoke" BorderBrush="Teal" BorderThickness="0" FontFamily="Arial"/>
-            <Label x:Name="label_Copy10" Content="توان مصرفی ( kW )" HorizontalAlignment="Left" Margin="449,15,0,0" VerticalAlignment="Top" Width="188" Height="40" FontSize="24" RenderTransformOrigin="0.007,0.53" Background="{x:Null}" Foreground="White" BorderBrush="Teal" BorderThickness="0"/>
+            <Rectangle Fill="#FF333333" HorizontalAlignment="Left" Height="52" Margin="449,10,0,0" VerticalAlignment="Top" Width="353" Visibility="Hidden"/>
+            <Label x:Name="kWlabel" Content="" HorizontalAlignment="Left" Margin="652,13,0,0" VerticalAlignment="Top" Width="150" Height="44" FontSize="24" RenderTransformOrigin="0.007,0.53" Background="{x:Null}" Foreground="WhiteSmoke" BorderBrush="Teal" BorderThickness="0" FontFamily="Arial" Visibility="Hidden"/>
+            <Label x:Name="label_Copy10" Content="توان مصرفی ( kW )" HorizontalAlignment="Left" Margin="449,15,0,0" VerticalAlignment="Top" Width="188" Height="40" FontSize="24" RenderTransformOrigin="0.007,0.53" Background="{x:Null}" Foreground="White" BorderBrush="Teal" BorderThickness="0" Visibility="Hidden"/>
         </Grid>
-        
+
 
     </Grid>
 </Controls:MetroWindow>

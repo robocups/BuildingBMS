@@ -38,60 +38,60 @@ namespace building_bms
         //int[] fcs = new int[16];
         string[] holidaysList;
         string currentMode = "deactive";
-        int subnet = 106;
+        int subnet = 7;
         int[,] module = {
             //{235,12},
-            {11,4},
-            {12,4},
-            {13,4},
+            {13,9},
             {14,4},
-            {5,8},
-            {6,8},
+            {15,4},
+            //{1,4},
+            {11,8},
+            {12,8},
 
         };
         
         Dictionary<int, int[]> channels = new Dictionary<int, int[]>()
         {
             //{235, new int[]{0,0,0,0,0,0,0,0,0,0,0,0}},
-            {11, new int[] {0,0,0,0} },
-            {12, new int[] {0,0,0,0} },
-            {13, new int[] {0,0,0,0} },
+            {13, new int[] {0,0,0,0,0,0,0,0,0} },
             {14, new int[] {0,0,0,0} },
-            {5, new int[] {0,0,0,0,0,0,0,0} },
-            {6, new int[] {0,0,0,0,0,0,0,0} }
+            {15, new int[] {0,0,0,0} },
+            //{14, new int[] {0,0,0,0} },
+            {11, new int[] {0,0,0,0,0,0,0,0} },
+            {12, new int[] {0,0,0,0,0,0,0,0} }
         };
         Dictionary<string, int[]> switches = new Dictionary<string, int[]>()
         {
-            {"sw1",new int[]{6,4,12} },//S1 hallo
-            {"sw2",new int[]{6,3,10} },//S1 main
-            {"sw3",new int[]{5,5,10} },//S2 main
-            {"sw4",new int[]{5,6,12} },//S2 hallo
-            {"sw5",new int[]{5,7,10} },//S3 main
-            {"sw6",new int[]{5,8,12} },//S3 hallo
-            {"sw7",new int[]{6,6,10} },//S3 alt
+            {"sw1",new int[]{12,3,12} },//S1 hallo
+            {"sw2",new int[]{12,4,10} },//S1 main
+            {"sw3",new int[]{12,6,10} },//S2 main
+            {"sw4",new int[]{12,5,12} },//S2 hallo
+            {"sw5",new int[]{12,1,10} },//S3 main
+            {"sw6",new int[]{12,2,12} },//S3 hallo
+            {"sw7",new int[]{11,5,10} },//S3 alt
 
-            {"sw8",new int[]{5,1,10} },//S6 main
-            {"sw9",new int[]{5,2,12} },//S6 hallo
-            {"sw10",new int[]{5,4,12} },//S5 hallow 2
-            {"sw11",new int[]{5,3,10} },//S5 main
-            {"sw12",new int[]{5,4,12} },//S5 hallow 1
-            {"sw13",new int[]{6,1,10} },//S4 main
-            {"sw14",new int[]{6,2,12} },//S4 hallo
-            {"sw15",new int[]{0,6,10} },//kitchen
+            {"sw8",new int[]{11,4,10} },//S6 main
+            {"sw9",new int[]{11,3,12} },//S6 hallo
+            {"sw10",new int[]{12,8,12} },//S5 hallow 2
+            {"sw11",new int[]{12,7,10} },//S5 main
+            {"sw12",new int[]{12,8,12} },//S5 hallow 1
+            {"sw13",new int[]{11,2,10} },//S4 main
+            {"sw14",new int[]{11,1,12} },//S4 hallo
+            {"sw15",new int[]{11,6,10} },//kitchen
 
-            {"sp1",new int[]{14,4} },
-            {"sp2",new int[]{14,4} },
-            {"sp3",new int[]{14,4} },
-            {"sp4",new int[]{14,4} },
-            {"sp5",new int[]{14,4} },
+            {"sp1",new int[]{0,4} },
+            {"sp2",new int[]{0,4} },
+            {"sp3",new int[]{0,4} },
+            {"sp4",new int[]{0,4} },
+            {"sp5",new int[]{0,4} },
 
             {"Sockets",new int[]{0,0} },
-
-            {"fc1", new int[]{14,0,3,2,1} },
-            {"fc2", new int[]{13,11,1,4,3,2 } },
-            {"fc3", new int[]{12,0,2,1,1 } },
-            {"fc4", new int[]{ 11, 11, 1, 3, 2, 1 } },
-            {"fc5", new int[]{12,0,4,4,3 } },
+            {"sound", new int[] {0,0 } },
+            {"fc1", new int[]{15,11,5,3,2,1} },
+            {"fc2", new int[]{13,10,8,7,7 } },
+            {"fc3", new int[]{14,11,4,4,3,2 } },
+            {"fc4", new int[]{13, 11, 2, 6, 5, 4 } },
+            {"fc5", new int[]{13,11,1,3,2,1 } },
         };
         
         //int[,] speaker =
@@ -120,7 +120,7 @@ namespace building_bms
         //timers flags
         bool deactiveDone = false, extratime_reset=false, timerCommand=false;
 
-        database db = new database();
+        //database db = new database();
         StreamWriter sw = new StreamWriter(AppDomain.CurrentDomain.BaseDirectory + "\\log.txt", true);
         Timer myTimer = new Timer(5000);// every 5 secs
         Timer inbioTimer = new Timer(1000);// every secs
@@ -387,7 +387,7 @@ namespace building_bms
             timerCommand = true;
             allfc_off_btn_Click(null, null);
             await Task.Delay(3000);
-            
+
             alllights_off_btn_Click(null, null);
             timerCommand = false;
             await Task.Delay(400);
@@ -667,24 +667,7 @@ namespace building_bms
             // get the actual message and fill out the source:
             byte[] message = socket.EndReceive(result, ref source);
             // do what you'd like with `message` here:
-            //netlogtextbox.WriteLine("Got " + message.Length + " bytes from " + source);
-            //netloglines++;
-            //Application.Current.Dispatcher.Invoke(new Action(() =>
-            //{
-            //    if (netloglines < 50)
-            //    {
-            //        netlogtextbox.AppendText("Packet: { " + String.Join(" ", message) + " } - bytes from : " + source + "\n");
-            //        netlogtextbox.CaretIndex = netlogtextbox.Text.Length;
-            //    }
-            //    else
-            //    {
-            //        netlogtextbox.Text = "";
-            //        netloglines = 1;
-            //        netlogtextbox.AppendText("Packet: { " + String.Join(" ", message) + " } - bytes from : " + source + "\n");
-            //        netlogtextbox.CaretIndex = netlogtextbox.Text.Length;
-            //    }
-
-            //}));
+            
             msgproccess(message);
             // schedule the next receive operation once reading is done:
             socket.BeginReceive(new AsyncCallback(getpacket), socket);
@@ -692,7 +675,7 @@ namespace building_bms
 
 
         //
-        //parse and proccess cottage network messages (for direct mod)
+        //parse and proccess network messages (for direct mode)
         public async void msgproccess(byte[] msg)
         {
 
@@ -701,7 +684,6 @@ namespace building_bms
             Packet p = new Packet();
             Array.Copy(msg, 14, p.Data, 0, 11);
             Array.Copy(msg, 25, c, 0, clength);
-
             p.Content = c;
             UInt16 op = (p.OperationCode);
             string opcode = String.Format("0x{0:X}", op);
@@ -742,30 +724,29 @@ namespace building_bms
                     {
                         deactiveTimer.Enabled = true;
                     }
-
-                        break;
+                    break;
                 case "0x34"://channels state
                     int channelnumber = Convert.ToInt16(p.Data[11]);
                     id = Convert.ToInt16(p.OriginalDeviceID);
                     if (channels.ContainsKey((id)))
                     {
-                        
                         for (int i = 12; i < 12 + channelnumber; i++)
                         {
                             channels[id][i-12] = (Convert.ToInt16(p.Data[i]) == 0) ? 0 : 1;
                         }
                         refsw(id);
                         reffc(id);
-
                     }
-
                     break;
                 case "0xEFFF":
                     id = Convert.ToInt16(p.OriginalDeviceID);
                         com c2 = new com();
                         c2.getswitch(subnet, id, direct);
+                    if (deactiveDone && currentMode == "deactive" & deactiveTimer.Enabled == false & !timerCommand)
+                    {
+                        deactiveTimer.Enabled = true;
+                    }
                     break;
-
                 case "0x3":
                     //com c3 = new com();
                     //if (Convert.ToInt16(p.OriginalDeviceID) == did[ct - 7, 2])
@@ -784,7 +765,7 @@ namespace building_bms
                     //    c3.getswitch(subnet, did[ct - 7, 1], direct);
                     //}
                     break;
-                case "0xA39B":
+                case "0xA93B":
                     //AC Respond
                     id = Convert.ToInt16(p.OriginalDeviceID);
                     com c4 = new com();
@@ -2071,13 +2052,23 @@ namespace building_bms
         private async void allfc_low_btn_Click(object sender, RoutedEventArgs e)
         {
             fc1_low_Checked(null, null);
+            await Task.Delay(150);
+            fc1_low_Checked(null, null);
             await Task.Delay(400);
+            fc2_low_Checked(null, null);
+            await Task.Delay(150);
             fc2_low_Checked(null, null);
             await Task.Delay(400);
             fc3_low_Checked(null, null);
+            await Task.Delay(150);
+            fc3_low_Checked(null, null);
             await Task.Delay(400);
             fc4_low_Checked(null, null);
+            await Task.Delay(150);
+            fc4_low_Checked(null, null);
             await Task.Delay(400);
+            fc5_low_Checked(null, null);
+            await Task.Delay(150);
             fc5_low_Checked(null, null);
             await Task.Delay(400);
 
@@ -2086,13 +2077,23 @@ namespace building_bms
         private async void allfc_med_btn_Click(object sender, RoutedEventArgs e)
         {
             fc1_med_Checked(null, null);
+            await Task.Delay(150);
+            fc1_med_Checked(null, null);
             await Task.Delay(400);
+            fc2_med_Checked(null, null);
+            await Task.Delay(150);
             fc2_med_Checked(null, null);
             await Task.Delay(400);
             fc3_med_Checked(null, null);
+            await Task.Delay(150);
+            fc3_med_Checked(null, null);
             await Task.Delay(400);
             fc4_med_Checked(null, null);
+            await Task.Delay(150);
+            fc4_med_Checked(null, null);
             await Task.Delay(400);
+            fc5_med_Checked(null, null);
+            await Task.Delay(150);
             fc5_med_Checked(null, null);
             await Task.Delay(400);
 
@@ -2101,13 +2102,23 @@ namespace building_bms
         private async void allfc_high_btn_Click(object sender, RoutedEventArgs e)
         {
             fc1_high_Checked(null, null);
+            await Task.Delay(150);
+            fc1_high_Checked(null, null);
             await Task.Delay(400);
+            fc2_high_Checked(null, null);
+            await Task.Delay(150);
             fc2_high_Checked(null, null);
             await Task.Delay(400);
             fc3_high_Checked(null, null);
+            await Task.Delay(150);
+            fc3_high_Checked(null, null);
             await Task.Delay(400);
             fc4_high_Checked(null, null);
+            await Task.Delay(150);
+            fc4_high_Checked(null, null);
             await Task.Delay(400);
+            fc5_high_Checked(null, null);
+            await Task.Delay(150);
             fc5_high_Checked(null, null);
             await Task.Delay(400);
 

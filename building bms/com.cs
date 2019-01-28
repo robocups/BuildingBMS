@@ -40,7 +40,7 @@ namespace building_bms
         {
 
             Udpcon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPAddress send_to_address = IPAddress.Parse("192.168.10.255");
+            IPAddress send_to_address = IPAddress.Parse("192.168.1.255");
             IPEndPoint sending_end_point = new IPEndPoint(send_to_address, 6000);
             byte[] send_buffer = cmd;
             System.Diagnostics.Debug.Print("Print: >>" + protocol.Util.ByteA2Text(send_buffer));
